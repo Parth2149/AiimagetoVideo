@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: videlto-studio
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://videlto.online
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: ADMIN_PASSWORD
+        value: studio2026
+      - key: GEMINI_API_KEY
+        sync: false
