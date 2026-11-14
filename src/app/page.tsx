@@ -40,7 +40,7 @@ const SHOWCASE_STYLES: StyleShowcase[] = [
       'Deconstructs your product with numbered tactile tags, 45° bent elbow pointer lines, and elegant editorial display serifs.',
     bestFor: 'Food menus, gourmet dishes, consumer electronics, craftsmanship, cosmetics',
     videoUrl: '/verification_videos/salad_bowl_ad.mp4',
-    posterSnapshot: '/verification_snapshots/salad_bowl_scene1.png',
+    posterSnapshot: '/examples/style1_poster.jpg',
     accent: '#4E7D56',
     highlights: [
       'Numbered ingredient / feature tags (01..04)',
@@ -57,7 +57,7 @@ const SHOWCASE_STYLES: StyleShowcase[] = [
       'A cinematic 9:16 push-in zoom, ambient backdrop illumination, high-contrast glassmorphic cards, and punchy copywriting.',
     bestFor: 'Direct-response social ads, limited-edition product drops, e-commerce flash sales',
     videoUrl: '/examples/style2_spotlight.mp4',
-    posterSnapshot: '/verification_snapshots/vid_snap_style2.png',
+    posterSnapshot: '/examples/style2_poster.jpg',
     accent: '#E65100',
     highlights: [
       'Smooth cinematic 9:16 push-in zoom',
@@ -74,7 +74,7 @@ const SHOWCASE_STYLES: StyleShowcase[] = [
       'Authentic real-world environment and 3-beat candid human interaction storyboard with natural conversational voiceover.',
     bestFor: 'Dining experiences, lifestyle apparel, commercial vehicles, hospitality, wellness',
     videoUrl: '/verification_videos/test_pizza_lifestyle.mp4',
-    posterSnapshot: '/verification_snapshots/lifestyle_order_page_pizza.png',
+    posterSnapshot: '/examples/style3_poster.jpg',
     accent: '#D97706',
     highlights: [
       '3-Beat Storyboard (Entry, Savoring, Reaction)',
@@ -90,7 +90,8 @@ const BEFORE_AFTER = [
     title: 'Wood-Fired Pepperoni Pizza',
     category: 'Restaurant & Food Service',
     photo: '/images.jfif',
-    videoThumb: '/verification_snapshots/pizza_order_live.png',
+    video: '/verification_videos/test_pizza_lifestyle.mp4',
+    poster: '/verification_snapshots/pizza_poster.jpg',
     hook: '“CRISPY WOOD fired perfection EVERY SLICE”',
     features: ['Crispy Pepperoni Callout', 'Melted Mozzarella', 'Wood Fired Base'],
   },
@@ -98,7 +99,8 @@ const BEFORE_AFTER = [
     title: 'Farm Fresh Garden Salad',
     category: 'Health & Fast Casual Dining',
     photo: '/salad-bowl.jpg',
-    videoThumb: '/verification_snapshots/lifestyle_order_page_salad.png',
+    video: '/verification_videos/salad_bowl_ad.mp4',
+    poster: '/verification_snapshots/salad_poster.jpg',
     hook: '“FRESHNESS in every bite”',
     features: ['Sliced Avocado Pointer', 'Sweet Corn Kernels', 'Organic Greens'],
   },
@@ -106,7 +108,8 @@ const BEFORE_AFTER = [
     title: 'Commercial Fleet Hauler',
     category: 'Automotive & Logistics',
     photo: '/commercial-truck.jpg',
-    videoThumb: '/verification_snapshots/lifestyle_order_page_truck.png',
+    video: '/verification_videos/commercial_truck_ad.mp4',
+    poster: '/verification_snapshots/truck_poster.jpg',
     hook: '“BUILT FOR WORK • 500+ Horsepower”',
     features: ['Dual Chrome Stacks', 'Aerodynamic Cab', 'High-Durability Wheels'],
   },
@@ -219,7 +222,9 @@ export default function HomePage() {
               <div className="w-[260px] sm:w-[280px] aspect-[9/16] rounded-2xl overflow-hidden bg-black shadow-xl relative border border-border/80">
                 <video
                   key={currentStyle.videoUrl}
-                  src={currentStyle.videoUrl}
+                  src={`${currentStyle.videoUrl}#t=0.5`}
+                  poster={currentStyle.posterSnapshot}
+                  preload="metadata"
                   controls
                   autoPlay
                   playsInline
@@ -284,7 +289,7 @@ export default function HomePage() {
       {/* =================================================================== */}
       {/* 2. THE 3 SIGNATURE AD STYLES SECTION                                */}
       {/* =================================================================== */}
-      <section id="styles" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-12">
+      <section id="styles" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-12 scroll-mt-28">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <span className="text-xs font-bold uppercase tracking-widest text-accent-blue">
             3 Signature Director Formats
@@ -357,7 +362,7 @@ export default function HomePage() {
       {/* =================================================================== */}
       {/* 3. BEFORE & AFTER TRANSFORMATION GALLERY                            */}
       {/* =================================================================== */}
-      <section id="gallery" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-12">
+      <section id="gallery" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-12 scroll-mt-28">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <span className="text-xs font-bold uppercase tracking-widest text-emerald-700">
             Transformation Gallery
@@ -395,8 +400,17 @@ export default function HomePage() {
                   <span className="text-[10px] font-mono uppercase text-accent-blue block text-center font-bold">
                     Finished Video
                   </span>
-                  <div className="aspect-square rounded-xl overflow-hidden bg-black/5">
-                    <img src={card.videoThumb} alt={card.title} className="w-full h-full object-cover" />
+                  <div className="aspect-square rounded-xl overflow-hidden bg-black relative shadow-inner">
+                    <video
+                      src={card.video}
+                      poster={card.poster}
+                      muted
+                      loop
+                      playsInline
+                      autoPlay
+                      preload="metadata"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </div>
               </div>
@@ -419,7 +433,7 @@ export default function HomePage() {
       {/* =================================================================== */}
       {/* 4. HOW IT WORKS (3 SIMPLE STEPS)                                    */}
       {/* =================================================================== */}
-      <section id="how-it-works" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-12">
+      <section id="how-it-works" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-12 scroll-mt-28">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <span className="text-xs font-bold uppercase tracking-widest text-ink-muted">
             Simple 3-Step Workflow
@@ -479,7 +493,7 @@ export default function HomePage() {
           <div className="grid grid-cols-3 bg-canvas-subtle p-4 font-bold text-xs text-ink border-b border-border">
             <span>Production Factor</span>
             <span className="text-rose-700">Traditional Agency</span>
-            <span className="text-emerald-700">Videlto Motion Studio</span>
+            <span className="text-emerald-700 font-bold">Videlto</span>
           </div>
 
           <div className="divide-y divide-border/60 text-xs text-ink-secondary">
@@ -515,7 +529,7 @@ export default function HomePage() {
       {/* =================================================================== */}
       {/* 6. FAQ ACCORDION SECTION                                            */}
       {/* =================================================================== */}
-      <section id="faq" className="max-w-3xl mx-auto px-4 sm:px-6 space-y-8">
+      <section id="faq" className="max-w-3xl mx-auto px-4 sm:px-6 space-y-8 scroll-mt-28">
         <div className="text-center space-y-2">
           <span className="text-xs font-bold uppercase tracking-widest text-ink-muted">
             Got Questions?

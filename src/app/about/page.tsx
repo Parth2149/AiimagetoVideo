@@ -109,7 +109,7 @@ export default function AboutPage() {
           <div className="p-6 rounded-2xl bg-white border border-emerald-300 shadow-sm space-y-3">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
               <Film className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Videlto Motion Studio</span>
+              <span>Videlto</span>
             </span>
             <ul className="space-y-2 text-xs text-ink-secondary leading-relaxed">
               <li className="flex items-start gap-2">
@@ -154,7 +154,7 @@ export default function AboutPage() {
             </div>
             <h3 className="text-base font-bold text-ink">1. Visual Feature Analysis</h3>
             <p className="text-xs text-ink-secondary leading-relaxed">
-              Our director analyzes the exact object geometry, visible ingredients, textures, and coordinates (`[x, y]` normalized), pointing directly to real features in the photo.
+              Our director analyzes the exact object geometry, visible ingredients, textures, and coordinates (<code className="font-mono bg-canvas-subtle px-1 py-0.5 rounded text-[11px]">[x, y]</code> normalized), pointing directly to real features in the photo.
             </p>
           </div>
 

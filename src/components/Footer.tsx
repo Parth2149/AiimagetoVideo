@@ -20,7 +20,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-xs text-ink-secondary leading-relaxed">
-              Commercial motion studio transforming product photography into high-converting 9:16 video ads for social commerce.
+              Commercial video ad studio transforming product photography into high-converting video ads for social commerce.
             </p>
           </div>
 
@@ -94,7 +94,7 @@ export default function Footer() {
             <ul className="space-y-2 text-xs text-ink-secondary">
               <li>
                 <Link href="/about" className="hover:text-ink transition-colors">
-                  About Videlto & Motion Studio
+                  About Videlto
                 </Link>
               </li>
               <li>
@@ -120,7 +120,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-border/70 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-ink-muted">
           <div className="flex items-center gap-2">
-            <span>© {new Date().getFullYear()} Videlto (Motion Studio). All rights reserved.</span>
+            <span>© {new Date().getFullYear()} Videlto. All rights reserved.</span>
           </div>
           <div className="flex items-center gap-6">
             <Link href="/" className="hover:text-ink transition-colors">Home</Link>

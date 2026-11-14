@@ -20,7 +20,7 @@ export default function Header() {
                 Studio
               </span>
             </span>
-            <span className="text-[11px] text-ink-muted hidden sm:inline font-medium leading-none">Commercial Motion Studio</span>
+            <span className="text-[11px] text-ink-muted hidden sm:inline font-medium leading-none">Commercial Video Ad Studio</span>
           </div>
         </Link>
 

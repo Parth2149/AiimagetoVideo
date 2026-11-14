@@ -129,15 +129,15 @@ export default function AdPreviewFrame({
                 />
               ) : (
                 /* Clean Empty State - Positioned in the upper half above bottom card */
-                <div className={`absolute inset-0 flex flex-col items-center justify-center text-center bg-[#FAF8F5] transition-all ${
-                  isLandscape ? 'pb-24 sm:pb-28 pt-6 px-4' : 'pb-36 sm:pb-40 pt-12 px-6'
+                <div className={`absolute inset-0 flex flex-col items-center text-center bg-[#FAF8F5] transition-all ${
+                  isLandscape ? 'justify-start pt-5 pb-16 px-4' : 'justify-center pb-36 sm:pb-40 pt-12 px-6'
                 }`}>
                   <div className={`rounded-2xl bg-stone-100 flex items-center justify-center text-ink-muted border border-border/80 ${
                     isLandscape ? 'w-8 h-8 mb-1.5' : 'w-12 h-12 mb-2.5'
                   }`}>
                     <Film className={isLandscape ? 'w-4 h-4 opacity-60' : 'w-6 h-6 opacity-60'} />
                   </div>
-                  <p className="text-xs font-semibold text-ink">Upload your product photo(s) to preview your ad</p>
+                  <p className="text-xs font-semibold text-ink leading-tight">Upload your product photo(s) to preview your ad</p>
                   <p className="text-[10px] sm:text-[11px] text-ink-muted mt-1 max-w-[290px] leading-tight">
                     Accepts 1 to 5 product angles · Visualizing {isLandscape ? '16:9 Landscape' : '9:16 Vertical'} format
                   </p>
