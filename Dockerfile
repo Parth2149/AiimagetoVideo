@@ -1,11 +1,12 @@
 FROM node:20-bookworm-slim
 
-# Install system dependencies: Python 3, pip, FFmpeg, and certificates
+# Install system dependencies: Python 3, pip, FFmpeg, certificates, and libatomic1 (required by Playwright driver)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
     ffmpeg \
     ca-certificates \
+    libatomic1 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
