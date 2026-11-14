@@ -128,18 +128,18 @@ export default function AdPreviewFrame({
                   className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 animate-fade-in"
                 />
               ) : (
-                /* Clean Empty State - Perfectly Centered in visible area above bottom card */
-                <div className={`absolute inset-0 flex flex-col items-center justify-center text-center bg-[#FAF8F5] ${
-                  isLandscape ? 'pt-8 pb-24 px-4' : 'pt-12 pb-36 px-6'
+                /* Clean Empty State - Positioned in the upper half above bottom card */
+                <div className={`absolute inset-0 flex flex-col items-center justify-center text-center bg-[#FAF8F5] transition-all ${
+                  isLandscape ? 'pb-24 sm:pb-28 pt-6 px-4' : 'pb-36 sm:pb-40 pt-12 px-6'
                 }`}>
                   <div className={`rounded-2xl bg-stone-100 flex items-center justify-center text-ink-muted border border-border/80 ${
-                    isLandscape ? 'w-9 h-9 mb-1.5' : 'w-12 h-12 mb-2.5'
+                    isLandscape ? 'w-8 h-8 mb-1.5' : 'w-12 h-12 mb-2.5'
                   }`}>
                     <Film className={isLandscape ? 'w-4 h-4 opacity-60' : 'w-6 h-6 opacity-60'} />
                   </div>
                   <p className="text-xs font-semibold text-ink">Upload your product photo(s) to preview your ad</p>
-                  <p className="text-[10px] sm:text-[11px] text-ink-muted mt-0.5 max-w-[280px] leading-tight">
-                    Accepts 1 to 5 product angles • Visualizing {isLandscape ? '16:9 Landscape' : '9:16 Vertical'} format
+                  <p className="text-[10px] sm:text-[11px] text-ink-muted mt-1 max-w-[290px] leading-tight">
+                    Accepts 1 to 5 product angles · Visualizing {isLandscape ? '16:9 Landscape' : '9:16 Vertical'} format
                   </p>
                 </div>
               )}
@@ -165,28 +165,43 @@ export default function AdPreviewFrame({
 
               {/* Bottom Agency-Grade Graphic Text Box */}
               <div className={`relative z-10 bg-gradient-to-t from-black/85 via-black/45 to-transparent flex flex-col ${
-                isLandscape ? (!hasPhotos ? 'p-2.5 gap-1.5' : 'p-3 gap-2') : 'p-4 sm:p-5 gap-2'
+                isLandscape ? (!hasPhotos ? 'p-2 gap-1' : 'p-3 gap-2') : 'p-4 sm:p-5 gap-2'
               }`}>
-                <div className={`rounded-2xl bg-black/45 backdrop-blur-md border border-white/15 space-y-1 shadow-lg ${
-                  isLandscape ? (!hasPhotos ? 'p-2' : 'p-2.5') : 'p-3.5'
-                }`}>
-                  <span
-                    className="text-[9px] tracking-widest font-bold uppercase drop-shadow block"
-                    style={{ color: accentColor }}
-                  >
-                    {displayBadge}
-                  </span>
-                  <h3 className={`text-white font-semibold leading-tight drop-shadow-sm font-sans ${
-                    isLandscape ? 'text-xs sm:text-sm' : 'text-base'
+                {isLandscape && !hasPhotos ? (
+                  <div className="rounded-xl bg-black/50 backdrop-blur-md border border-white/15 px-2.5 py-1.5 flex items-center justify-between gap-2 shadow-lg">
+                    <div className="flex items-center gap-1.5 truncate">
+                      <span
+                        className="text-[9px] tracking-widest font-bold uppercase drop-shadow shrink-0"
+                        style={{ color: accentColor }}
+                      >
+                        {displayBadge}
+                      </span>
+                      <span className="text-white/60 text-[10px]">•</span>
+                      <span className="text-white text-xs font-semibold truncate drop-shadow-sm font-sans">
+                        {displayHeadline}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className={`rounded-2xl bg-black/45 backdrop-blur-md border border-white/15 space-y-1 shadow-lg ${
+                    isLandscape ? 'p-2.5' : 'p-3.5'
                   }`}>
-                    {displayHeadline}
-                  </h3>
-                  <p className={`text-white/80 text-[11px] leading-relaxed ${
-                    isLandscape && !hasPhotos ? 'line-clamp-1' : 'line-clamp-2'
-                  }`}>
-                    {displaySubheadline}
-                  </p>
-                </div>
+                    <span
+                      className="text-[9px] tracking-widest font-bold uppercase drop-shadow block"
+                      style={{ color: accentColor }}
+                    >
+                      {displayBadge}
+                    </span>
+                    <h3 className={`text-white font-semibold leading-tight drop-shadow-sm font-sans ${
+                      isLandscape ? 'text-xs sm:text-sm' : 'text-base'
+                    }`}>
+                      {displayHeadline}
+                    </h3>
+                    <p className="text-white/80 text-[11px] leading-relaxed line-clamp-2">
+                      {displaySubheadline}
+                    </p>
+                  </div>
+                )}
 
                 <div className="flex items-center justify-between pt-0.5">
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full text-xs font-semibold bg-white text-ink shadow-md hover:bg-stone-100 transition-colors cursor-pointer">

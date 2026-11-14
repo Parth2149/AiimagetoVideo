@@ -484,7 +484,7 @@ export default function CreateAdPage() {
               </div>
 
               <div className={`rounded-2xl overflow-hidden bg-black relative flex items-center justify-center transition-all duration-300 ${
-                isLandscapeClip ? 'aspect-video' : 'aspect-[9/16]'
+                isLandscapeClip ? 'aspect-video w-full' : 'aspect-[9/16] max-h-[80vh]'
               }`}>
                 <video
                   src={previewModalVideo.url}
@@ -492,7 +492,7 @@ export default function CreateAdPage() {
                   autoPlay
                   playsInline
                   loop
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-cover block"
                 />
               </div>
 
