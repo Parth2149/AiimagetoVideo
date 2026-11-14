@@ -37,38 +37,68 @@ export async function savePhotoFile(file: File): Promise<{
   mimeType: string;
   size: number;
 }> {
+  const [saved] = await savePhotoFiles([file]);
+  return saved;
+}
+
+export async function savePhotoFiles(files: File[]): Promise<Array<{
+  filename: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+}>> {
   ensureUploadDirs();
 
-  const originalName = file.name || 'product.jpg';
-  const ext = path.extname(originalName).toLowerCase();
-  const mimeType = file.type || 'image/jpeg';
-
-  if (!ALLOWED_PHOTO_EXTS.includes(ext) && !ALLOWED_PHOTO_TYPES.includes(mimeType)) {
-    throw new Error('Invalid photo format. Please upload JPG, PNG, WebP, or JFIF.');
+  if (!files || files.length === 0) {
+    throw new Error('Please upload at least 1 product photo.');
   }
 
-  if (file.size > MAX_PHOTO_BYTES) {
-    throw new Error('Photo exceeds maximum allowed size (25MB).');
+  if (files.length > 5) {
+    throw new Error('A maximum of 5 product photos can be uploaded per video ad.');
   }
 
-  const arrayBuffer = await file.arrayBuffer();
-  const rawBuffer = Buffer.from(arrayBuffer);
+  const results: Array<{
+    filename: string;
+    originalName: string;
+    mimeType: string;
+    size: number;
+  }> = [];
 
-  // Normalize image into standard RGB JPEG bytes
-  const jpegBuffer = await sharp(rawBuffer)
-    .toFormat('jpeg', { quality: 92 })
-    .toBuffer();
+  for (const file of files) {
+    const originalName = file.name || 'product.jpg';
+    const ext = path.extname(originalName).toLowerCase();
+    const mimeType = file.type || 'image/jpeg';
 
-  const filename = `photo_${Date.now()}_${crypto.randomBytes(8).toString('hex')}.jpg`;
-  const targetPath = path.join(PHOTOS_DIR, filename);
-  fs.writeFileSync(targetPath, jpegBuffer);
+    if (!ALLOWED_PHOTO_EXTS.includes(ext) && !ALLOWED_PHOTO_TYPES.includes(mimeType)) {
+      throw new Error(`Invalid format for "${originalName}". Please upload JPG, PNG, WebP, or JFIF.`);
+    }
 
-  return {
-    filename,
-    originalName,
-    mimeType: 'image/jpeg',
-    size: jpegBuffer.length,
-  };
+    if (file.size > MAX_PHOTO_BYTES) {
+      throw new Error(`Photo "${originalName}" exceeds maximum allowed size (25MB).`);
+    }
+
+    const arrayBuffer = await file.arrayBuffer();
+    const rawBuffer = Buffer.from(arrayBuffer);
+
+    // Normalize image into standard RGB JPEG bytes (removes Alpha, rotates EXIF)
+    const jpegBuffer = await sharp(rawBuffer)
+      .rotate()
+      .toFormat('jpeg', { quality: 92 })
+      .toBuffer();
+
+    const filename = `photo_${Date.now()}_${crypto.randomBytes(8).toString('hex')}.jpg`;
+    const targetPath = path.join(PHOTOS_DIR, filename);
+    fs.writeFileSync(targetPath, jpegBuffer);
+
+    results.push({
+      filename,
+      originalName,
+      mimeType: 'image/jpeg',
+      size: jpegBuffer.length,
+    });
+  }
+
+  return results;
 }
 
 export async function saveVideoFile(file: File): Promise<{
@@ -114,6 +144,12 @@ export function getPhotoFilePath(filename: string): string | null {
     return fullPath;
   }
   return null;
+}
+
+export function getPhotoFilePaths(filenames: string[]): string[] {
+  return filenames
+    .map((fn) => getPhotoFilePath(fn))
+    .filter((p): p is string => Boolean(p));
 }
 
 export function getVideoFilePath(filename: string): string | null {

@@ -61,6 +61,13 @@ export interface AdCreativeMetadata {
   lifestyle_story?: string;
 }
 
+export interface PhotoRecord {
+  filename: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+}
+
 export interface Order {
   id: string;
   token: string;
@@ -71,6 +78,7 @@ export interface Order {
   photo_original_name: string;
   photo_mime_type: string;
   photo_size: number;
+  photos_json?: string | null;
   video_filename: string | null;
   video_original_name: string | null;
   video_mime_type: string | null;
@@ -128,6 +136,10 @@ export function getDatabase(): any {
     db.exec(`ALTER TABLE orders ADD COLUMN ad_metadata TEXT;`);
   } catch {}
 
+  try {
+    db.exec(`ALTER TABLE orders ADD COLUMN photos_json TEXT;`);
+  } catch {}
+
   dbInstance = db;
   return dbInstance;
 }
@@ -135,10 +147,11 @@ export function getDatabase(): any {
 export function createOrder(data: {
   brief: string;
   videoStyle?: VideoStyle;
-  photoFilename: string;
-  photoOriginalName: string;
-  photoMimeType: string;
-  photoSize: number;
+  photoFilename?: string;
+  photoOriginalName?: string;
+  photoMimeType?: string;
+  photoSize?: number;
+  photos?: PhotoRecord[];
 }): Order {
   const db = getDatabase();
   const id = `ord_${crypto.randomBytes(8).toString('hex')}`;
@@ -146,16 +159,30 @@ export function createOrder(data: {
   const now = Date.now();
   const style = data.videoStyle || 'style2_spotlight';
 
+  const photoRecords: PhotoRecord[] = data.photos && data.photos.length > 0
+    ? data.photos
+    : [{
+        filename: data.photoFilename || 'photo.jpg',
+        originalName: data.photoOriginalName || 'product.jpg',
+        mimeType: data.photoMimeType || 'image/jpeg',
+        size: data.photoSize || 0,
+      }];
+
+  const primaryPhoto = photoRecords[0];
+  const photosJson = JSON.stringify(photoRecords);
+
   const stmt = db.prepare(`
     INSERT INTO orders (
       id, token, status, video_style, brief,
       photo_filename, photo_original_name, photo_mime_type, photo_size,
+      photos_json,
       video_filename, video_original_name, video_mime_type, video_size,
       ad_metadata,
       created_at, updated_at
     ) VALUES (
       ?, ?, 'submitted', ?, ?,
       ?, ?, ?, ?,
+      ?,
       NULL, NULL, NULL, NULL,
       NULL,
       ?, ?
@@ -167,15 +194,35 @@ export function createOrder(data: {
     token,
     style,
     data.brief.trim(),
-    data.photoFilename,
-    data.photoOriginalName,
-    data.photoMimeType,
-    data.photoSize,
+    primaryPhoto.filename,
+    primaryPhoto.originalName,
+    primaryPhoto.mimeType,
+    primaryPhoto.size,
+    photosJson,
     now,
     now
   );
 
   return getOrderById(id)!;
+}
+
+export function getOrderPhotos(order: Order): PhotoRecord[] {
+  if (order.photos_json) {
+    try {
+      const parsed = JSON.parse(order.photos_json);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    } catch {}
+  }
+  return [
+    {
+      filename: order.photo_filename,
+      originalName: order.photo_original_name,
+      mimeType: order.photo_mime_type,
+      size: order.photo_size,
+    },
+  ];
 }
 
 export function getOrderByToken(token: string): Order | null {

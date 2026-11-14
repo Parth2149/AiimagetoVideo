@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SatinShader from './SatinShader';
-import { Volume2, VolumeX, ShoppingBag, Film } from 'lucide-react';
+import { Volume2, VolumeX, ShoppingBag, Film, Layers } from 'lucide-react';
 import type { AdCreativeMetadata } from '@/lib/db';
 
 interface AdPreviewFrameProps {
-  photoUrl: string | null;
+  photoUrl?: string | null;
+  photoUrls?: string[];
   videoUrl?: string | null;
   briefText?: string;
   adMetadata?: AdCreativeMetadata | null;
@@ -18,6 +19,7 @@ interface AdPreviewFrameProps {
 
 export default function AdPreviewFrame({
   photoUrl,
+  photoUrls = [],
   videoUrl,
   briefText = '',
   adMetadata,
@@ -27,6 +29,25 @@ export default function AdPreviewFrame({
   isStatusPage = false,
 }: AdPreviewFrameProps) {
   const [isMuted, setIsMuted] = useState(true);
+  const [activeCycleIndex, setActiveCycleIndex] = useState(0);
+
+  // Combine photoUrl and photoUrls into one list
+  const allUrls: string[] = photoUrls.length > 0
+    ? photoUrls
+    : photoUrl
+    ? [photoUrl]
+    : [];
+
+  // Gently cycle preview photos every 3 seconds if multiple photos are present
+  useEffect(() => {
+    if (allUrls.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveCycleIndex((prev) => (prev + 1) % allUrls.length);
+    }, 3200);
+    return () => clearInterval(interval);
+  }, [allUrls.length]);
+
+  const activeDisplayPhoto = allUrls.length > 0 ? allUrls[activeCycleIndex % allUrls.length] : null;
 
   // Dynamic human-directed values
   const displayBrand = adMetadata?.brand_name || brandTag;
@@ -48,7 +69,7 @@ export default function AdPreviewFrame({
       {/* Portrait 9:16 Ad Preview Phone/Frame */}
       <div className="relative z-10 rounded-[32px] p-2.5 sm:p-3 bg-white/80 backdrop-blur-md border border-[#E6E2D9] shadow-floating transition-all duration-300">
         <div className="relative w-full aspect-[9/16] rounded-[24px] overflow-hidden bg-stone-900 border border-stone-200/40 flex flex-col justify-between shadow-inner">
-          
+
           {videoUrl ? (
             /* Finished Video Ad Player - video contains full animated typography & graphic overlays */
             <div className="relative w-full h-full bg-black group">
@@ -61,7 +82,7 @@ export default function AdPreviewFrame({
                 playsInline
                 controls={false}
               />
-              
+
               {/* Audio Toggle & Playback Status */}
               <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
                 <button
@@ -84,28 +105,38 @@ export default function AdPreviewFrame({
           ) : (
             /* Still Ad Preview with Real Human-Directed Typography & Glassmorphism */
             <div className="relative w-full h-full flex flex-col justify-between bg-stone-100">
-              {/* Product Photo */}
-              {photoUrl ? (
+              {/* Product Photo with crossfade transition */}
+              {activeDisplayPhoto ? (
                 <img
-                  src={photoUrl}
+                  key={activeDisplayPhoto}
+                  src={activeDisplayPhoto}
                   alt="Product preview"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 animate-fade-in"
                 />
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-[#FAF8F5]">
                   <Film className="w-8 h-8 text-ink-muted mb-2 opacity-50" />
-                  <p className="text-xs text-ink-secondary">Upload a product photo to see live ad mockup</p>
+                  <p className="text-xs text-ink-secondary">Upload product photos to see live ad mockup</p>
                 </div>
               )}
 
-              {/* Top Ad Header Pill */}
+              {/* Top Ad Header Pill + Angle Badge */}
               <div className="relative z-10 p-4 pt-5 flex items-center justify-between">
                 <span className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-black/45 backdrop-blur-md text-white border border-white/20 shadow-sm">
                   {displayBrand}
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-medium bg-white/80 backdrop-blur text-ink border border-white/50">
-                  {isStatusPage ? 'Processing' : 'Live Mockup'}
-                </span>
+
+                <div className="flex items-center gap-1.5">
+                  {allUrls.length > 1 && (
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-ink/70 text-white backdrop-blur border border-white/30 flex items-center gap-1">
+                      <Layers className="w-3 h-3 text-accent-blue" />
+                      <span>{allUrls.length} Angles</span>
+                    </span>
+                  )}
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-medium bg-white/80 backdrop-blur text-ink border border-white/50">
+                    {isStatusPage ? 'Processing' : 'Live Mockup'}
+                  </span>
+                </div>
               </div>
 
               {/* Bottom Agency-Grade Graphic Text Box */}

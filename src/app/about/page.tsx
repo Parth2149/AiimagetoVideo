@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { Film, CheckCircle2, ArrowRight, ShieldCheck, Zap, Layers, Cpu, Eye, Compass, Award } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'About Videlto — Autonomous Commercial Video Ad Director',
+  title: 'About Videlto — Commercial Video Ad Studio',
   description:
     'Learn how Videlto delivers agency-grade commercial video ad production, generating bespoke 9:16 commercial video ads in seconds.',
   alternates: {

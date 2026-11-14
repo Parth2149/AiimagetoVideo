@@ -91,20 +91,25 @@ def create_editorial_overlay(width: int, height: int, cta_text: str) -> Image.Im
     return overlay
 
 def generate_reference_lifestyle_video(image_path: str, plan: dict, raw_video_path: str, ffmpeg_bin: str, allow_synthesis: bool = True):
-    """Stage 2: Generates 10-second reference-anchored lifestyle video via gemini-omni-1.2-flash with zero on-screen text."""
+    """Stage 2: Generates 10-second reference-anchored lifestyle video via gemini-omni-1.2-flash with zero on-screen text, passing all uploaded reference images."""
     api_key = get_api_key()
-    
-    with open(image_path, 'rb') as f:
-        img_b64 = base64.b64encode(f.read()).decode('utf-8')
 
-    prompt = f"""Generate a 10-second 9:16 vertical cinematic commercial lifestyle video featuring the exact product in the reference image.
+    candidate_paths = plan.get('photo_paths') or [image_path]
+    if isinstance(candidate_paths, str):
+        candidate_paths = [candidate_paths]
+
+    valid_paths = [os.path.abspath(p) for p in candidate_paths if os.path.exists(p)]
+    if not valid_paths and os.path.exists(image_path):
+        valid_paths = [os.path.abspath(image_path)]
+
+    prompt = f"""Generate a 10-second 9:16 vertical cinematic commercial lifestyle video featuring the exact product in the {len(valid_paths)} reference image(s).
 Duration: 10 seconds.
 Aspect Ratio: 9:16 vertical (1080x1920).
 Native Audio: Synchronized ambient room/environment sound and warm conversational voiceover matching the audio script.
 
 PRODUCT FIDELITY RULES:
-- Preserve the exact product appearance, shape, plating/packaging, branding, textures, and colors from the reference image: {plan.get('product_subject', 'The product in the reference image')}.
-- The product must be 100% recognizable, in high focus, and identical to the reference photo.
+- Preserve the exact product appearance, shape, plating/packaging, branding, textures, and colors from ALL {len(valid_paths)} reference images: {plan.get('product_subject', 'The product in the reference images')}.
+- The product must be 100% recognizable, in high focus, and identical to the reference photos from every camera angle.
 
 AUTHENTIC ENVIRONMENT:
 - {plan.get('environment', 'A modern, beautifully lit commercial setting')}
@@ -123,12 +128,16 @@ CINEMATOGRAPHY:
 CRITICAL NEGATIVE CONSTRAINTS:
 - ZERO ON-SCREEN TEXT: Do NOT render any text, captions, subtitles, logos, or titles inside the video frames. All text overlays will be added in post-production."""
 
+    parts = []
+    for vp in valid_paths:
+        with open(vp, 'rb') as f:
+            b64 = base64.b64encode(f.read()).decode('utf-8')
+        parts.append({"inline_data": {"mime_type": "image/jpeg", "data": b64}})
+    parts.append({"text": prompt})
+
     payload = {
         "contents": [{
-            "parts": [
-                {"inline_data": {"mime_type": "image/jpeg", "data": img_b64}},
-                {"text": prompt}
-            ]
+            "parts": parts
         }]
     }
 
@@ -159,31 +168,87 @@ CRITICAL NEGATIVE CONSTRAINTS:
         omni_error = "GEMINI_API_KEY is missing."
 
     if not omni_succeeded:
-        # Check if environment allows synthesis or if strict error should be raised
         allow_synth = allow_synthesis or os.environ.get('ALLOW_LIFESTYLE_SYNTHESIS', 'true').lower() == 'true'
         if not allow_synth:
             raise RuntimeError(f"Reference-anchored video generation failed: {omni_error}")
-        
-        print(f"[Lifestyle Engine] gemini-omni-1.2-flash unbilled/quota ({omni_error[:90]}...). Synthesizing reference-anchored 10s video from uploaded photo...")
-        # Synthesize reference-anchored 10-second cinematic video directly from the product image
-        cmd = [
-            ffmpeg_bin, "-y",
-            "-loop", "1", "-i", image_path,
-            "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo",
-            "-filter_complex",
-            "[0:v]scale=1200:2134:force_original_aspect_ratio=increase,crop=1080:1920,zoompan=z='min(zoom+0.0008,1.15)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=300:s=1080x1920:fps=30,eq=contrast=1.06:brightness=0.01:saturation=1.12,format=yuv420p[v]",
-            "-map", "[v]",
-            "-map", "1:a",
-            "-c:v", "libx264",
-            "-t", "10",
-            "-pix_fmt", "yuv420p",
-            "-c:a", "aac",
-            "-b:a", "192k",
-            raw_video_path
-        ]
-        res = subprocess.run(cmd, capture_output=True, text=True)
-        if res.returncode != 0:
-            raise RuntimeError(f"Synthetic video generation failed: {res.stderr}")
+
+        print(f"[Lifestyle Engine] gemini-omni-1.2-flash unbilled/quota ({omni_error[:90]}...). Synthesizing reference-anchored 10s video from {len(valid_paths)} uploaded photo angle(s)...")
+
+        if len(valid_paths) == 1:
+            cmd = [
+                ffmpeg_bin, "-y",
+                "-loop", "1", "-i", valid_paths[0],
+                "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo",
+                "-filter_complex",
+                "[0:v]scale=1200:2134:force_original_aspect_ratio=increase,crop=1080:1920,zoompan=z='min(zoom+0.0008,1.15)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=300:s=1080x1920:fps=30,eq=contrast=1.06:brightness=0.01:saturation=1.12,format=yuv420p[v]",
+                "-map", "[v]",
+                "-map", "1:a",
+                "-c:v", "libx264",
+                "-t", "10",
+                "-pix_fmt", "yuv420p",
+                "-c:a", "aac",
+                "-b:a", "192k",
+                raw_video_path
+            ]
+            res = subprocess.run(cmd, capture_output=True, text=True)
+            if res.returncode != 0:
+                raise RuntimeError(f"Synthetic video generation failed: {res.stderr}")
+        else:
+            # Multi-angle rhythmic editorial cut across all uploaded angles
+            sub_clips = []
+            N = len(valid_paths)
+            clip_duration = round(10.0 / N, 2)
+            try:
+                for idx, vp in enumerate(valid_paths):
+                    clip_file = os.path.abspath(f"temp_subclip_{idx}_{uuid.uuid4().hex[:6]}.mp4")
+                    sub_clips.append(clip_file)
+                    # Alternate zoom directions: push-in vs subtle drift
+                    if idx % 2 == 0:
+                        zp_expr = "zoompan=z='min(zoom+0.0012,1.18)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=150:s=1080x1920:fps=30"
+                    else:
+                        zp_expr = "zoompan=z='1.12-0.0008*on':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=150:s=1080x1920:fps=30"
+
+                    cmd_clip = [
+                        ffmpeg_bin, "-y",
+                        "-loop", "1", "-i", vp,
+                        "-filter_complex",
+                        f"[0:v]scale=1200:2134:force_original_aspect_ratio=increase,crop=1080:1920,{zp_expr},eq=contrast=1.05:brightness=0.01:saturation=1.1,format=yuv420p[v]",
+                        "-map", "[v]",
+                        "-c:v", "libx264",
+                        "-t", str(clip_duration),
+                        "-pix_fmt", "yuv420p",
+                        clip_file
+                    ]
+                    subprocess.run(cmd_clip, capture_output=True, check=True)
+
+                # Concatenate subclips and attach ambient audio
+                concat_list = os.path.abspath(f"temp_concat_{uuid.uuid4().hex[:6]}.txt")
+                with open(concat_list, 'w', encoding='utf-8') as f:
+                    for cf in sub_clips:
+                        f.write(f"file '{cf.replace(os.sep, '/')}'\n")
+
+                cmd_concat = [
+                    ffmpeg_bin, "-y",
+                    "-f", "concat", "-safe", "0", "-i", concat_list,
+                    "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo",
+                    "-map", "0:v",
+                    "-map", "1:a",
+                    "-c:v", "copy",
+                    "-c:a", "aac",
+                    "-b:a", "192k",
+                    "-t", "10",
+                    raw_video_path
+                ]
+                subprocess.run(cmd_concat, capture_output=True, check=True)
+                if os.path.exists(concat_list):
+                    os.remove(concat_list)
+            finally:
+                for cf in sub_clips:
+                    if os.path.exists(cf):
+                        try: os.remove(cf)
+                        except: pass
+
+    return raw_video_path
 
     return raw_video_path
 

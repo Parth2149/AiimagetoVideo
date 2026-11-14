@@ -10,29 +10,29 @@ import { VideoStyle } from '@/lib/db';
 const SAMPLES = [
   {
     id: 'pizza',
-    label: '🍕 Pepperoni Pizza',
-    path: '/images.jfif',
+    label: '🍕 Pepperoni Pizza (2 Angles)',
+    paths: ['/images.jfif', '/artisan-pizza.jpg'],
     brief: 'Artisan wood-fired pepperoni pizza ad. End with Order Hot Now.',
     style: 'style1_explainer' as VideoStyle,
   },
   {
     id: 'salad',
     label: '🥗 Salad Bowl',
-    path: '/salad-bowl.jpg',
+    paths: ['/salad-bowl.jpg'],
     brief: 'Deconstruct this fresh signature salad bowl with avocado and garden corn. End with Order Fresh Today.',
     style: 'style1_explainer' as VideoStyle,
   },
   {
     id: 'truck',
     label: '🚚 Fleet Truck',
-    path: '/commercial-truck.jpg',
+    paths: ['/commercial-truck.jpg'],
     brief: 'Commercial fleet heavy haulage rig ad. End with Built for the Long Haul.',
     style: 'style3_lifestyle' as VideoStyle,
   },
   {
     id: 'burger',
     label: '🍔 Artisan Burger',
-    path: '/salad-bowl.jpg', // Fallback image if needed
+    paths: ['/burger-and-fries.jpg'],
     brief: 'Artisanal burger stacked with crisp lettuce and golden cut fries. End with Order Today.',
     style: 'style2_spotlight' as VideoStyle,
   },
@@ -92,8 +92,9 @@ const TONE_PRESETS = [
 export default function CreateAdPage() {
   const router = useRouter();
 
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(SAMPLES[0].path);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>(SAMPLES[0].paths);
+  const [activeLabel, setActiveLabel] = useState<string>(SAMPLES[0].label);
   const [isUsingSample, setIsUsingSample] = useState(true);
   const [sampleChoice, setSampleChoice] = useState(SAMPLES[0].id);
   const [selectedStyle, setSelectedStyle] = useState<VideoStyle>('style1_explainer');
@@ -105,20 +106,12 @@ export default function CreateAdPage() {
   // Modal for previewing sample video
   const [previewModalVideo, setPreviewModalVideo] = useState<{ title: string; url: string } | null>(null);
 
-  useEffect(() => {
-    if (selectedFile) {
-      const url = URL.createObjectURL(selectedFile);
-      setPreviewUrl(url);
-      setIsUsingSample(false);
-      return () => URL.revokeObjectURL(url);
-    }
-  }, [selectedFile]);
-
   const activeStyleConfig = VIDEO_STYLES.find((s) => s.id === selectedStyle) || VIDEO_STYLES[0];
 
   const handleSelectSample = (sample: typeof SAMPLES[0]) => {
-    setSelectedFile(null);
-    setPreviewUrl(sample.path);
+    setSelectedFiles([]);
+    setPreviewUrls(sample.paths);
+    setActiveLabel(sample.label);
     setIsUsingSample(true);
     setSampleChoice(sample.id);
     setSelectedStyle(sample.style);
@@ -127,14 +120,17 @@ export default function CreateAdPage() {
     }
   };
 
-  const handleFileSelect = (file: File | null) => {
-    if (file) {
-      setSelectedFile(file);
-      setIsUsingSample(false);
+  const handleFilesChange = (newFiles: File[], newUrls: string[]) => {
+    setSelectedFiles(newFiles);
+    setPreviewUrls(newUrls);
+    setIsUsingSample(false);
+
+    if (newFiles.length === 0) {
+      setActiveLabel('No Photos Uploaded');
+    } else if (newFiles.length === 1) {
+      setActiveLabel(`${newFiles[0].name} (Hero Angle)`);
     } else {
-      setSelectedFile(null);
-      setIsUsingSample(false);
-      setPreviewUrl(null);
+      setActiveLabel(`${newFiles.length} Product Angles Ready`);
     }
   };
 
@@ -144,8 +140,8 @@ export default function CreateAdPage() {
 
     const activeBrief = brief.trim() || activeStyleConfig.placeholder;
 
-    if (!selectedFile && !isUsingSample) {
-      setErrorMessage('Please upload a product photo or select one of the instant samples above.');
+    if (selectedFiles.length === 0 && !isUsingSample) {
+      setErrorMessage('Please upload 1 to 5 product photos or select one of the instant samples above.');
       return;
     }
 
@@ -157,16 +153,19 @@ export default function CreateAdPage() {
       formData.append('videoStyle', selectedStyle);
       formData.append('aspectRatio', aspectRatio);
 
-      if (selectedFile) {
-        formData.append('photo', selectedFile);
-        formData.append('useSampleSalad', 'false');
+      if (selectedFiles.length > 0) {
+        for (const file of selectedFiles) {
+          formData.append('images[]', file);
+        }
       } else {
-        // Fetch sample file as blob
+        // Fetch sample files as blobs
         const sampleObj = SAMPLES.find((s) => s.id === sampleChoice) || SAMPLES[0];
-        const res = await fetch(sampleObj.path);
-        const blob = await res.blob();
-        formData.append('photo', blob, sampleObj.path.split('/').pop() || 'sample.jpg');
-        formData.append('useSampleSalad', 'false');
+        for (const p of sampleObj.paths) {
+          const res = await fetch(p);
+          const blob = await res.blob();
+          const fname = p.split('/').pop() || 'sample.jpg';
+          formData.append('images[]', blob, fname);
+        }
       }
 
       const response = await fetch('/api/orders', {
@@ -243,13 +242,15 @@ export default function CreateAdPage() {
                 </div>
               </div>
 
-              {/* Dropzone */}
+              {/* Multi-Angle Dropzone */}
               <FileDropzone
-                file={selectedFile}
-                previewUrl={previewUrl}
-                onFileSelect={handleFileSelect}
+                files={selectedFiles}
+                previewUrls={previewUrls}
+                onFilesChange={handleFilesChange}
+                activeLabel={activeLabel}
                 isUsingSample={isUsingSample}
                 onUseSample={() => handleSelectSample(SAMPLES[0])}
+                maxFiles={5}
               />
             </div>
 
@@ -448,7 +449,8 @@ export default function CreateAdPage() {
 
             <div className="studio-card p-4 rounded-3xl border border-border/80 flex items-center justify-center bg-canvas-subtle/30">
               <AdPreviewFrame
-                photoUrl={previewUrl}
+                photoUrls={previewUrls}
+                photoUrl={previewUrls[0] || null}
                 briefText={brief || activeStyleConfig.placeholder}
               />
             </div>

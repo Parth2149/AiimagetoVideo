@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getOrderByToken, AdCreativeMetadata } from '@/lib/db';
+import { getOrderByToken, getOrderPhotos, AdCreativeMetadata } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,6 +27,14 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
     } catch {}
   }
 
+  const photoRecords = getOrderPhotos(order);
+  const photos = photoRecords.map((p, idx) => ({
+    index: idx,
+    url: `/api/media/photos/${p.filename}`,
+    originalName: p.originalName,
+    size: p.size,
+  }));
+
   return NextResponse.json({
     order: {
       id: order.id,
@@ -37,6 +45,7 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
       photoUrl: `/api/media/photos/${order.photo_filename}`,
       photoOriginalName: order.photo_original_name,
       photoSize: order.photo_size,
+      photos,
       videoUrl: order.video_filename ? `/api/media/videos/${order.video_filename}` : null,
       videoDownloadUrl: order.video_filename
         ? `/api/media/videos/${order.video_filename}?download=1&name=${encodeURIComponent(

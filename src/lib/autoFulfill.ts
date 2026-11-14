@@ -3,7 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { execFile } from 'node:child_process';
 import util from 'node:util';
-import { getOrderById, updateOrderStatus, attachVideoToOrder, failOrder, VideoStyle } from './db';
+import { getOrderById, getOrderPhotos, updateOrderStatus, attachVideoToOrder, failOrder, VideoStyle } from './db';
 import { ensureUploadDirs, getPhotoFilePath } from './storage';
 import { generateAdBlueprint, AdBlueprint } from './blueprint';
 import { generateLifestyleDirectorPlan, LifestyleDirectorPlan } from './lifestyleDirector';
@@ -20,13 +20,20 @@ export async function triggerAutoFulfill(orderId: string): Promise<void> {
       // 1. Mark as in_production
       updateOrderStatus(orderId, 'in_production');
 
-      const photoPath = getPhotoFilePath(order.photo_filename);
-      if (!photoPath || !fs.existsSync(photoPath)) {
-        throw new Error(`[${jobId}] Photo file not found on disk: ${order.photo_filename}`);
+      const photoRecords = getOrderPhotos(order);
+      const photoPaths = photoRecords
+        .map((p) => getPhotoFilePath(p.filename))
+        .filter((p): p is string => Boolean(p && fs.existsSync(p)));
+
+      if (photoPaths.length === 0) {
+        throw new Error(`[${jobId}] No valid photo files found on disk for order ${orderId}`);
       }
+
       const style: VideoStyle = (order.video_style as VideoStyle) || 'style1_explainer';
 
-      console.log(`[${jobId}] Starting dynamic video pipeline for order ${orderId} (${order.photo_original_name}), style: ${style}`);
+      console.log(
+        `[${jobId}] Starting multi-angle video pipeline for order ${orderId} (${photoPaths.length} photo(s)), style: ${style}`
+      );
 
       // =========================================================================
       // OPTION 3: style3_lifestyle (Cinematic Lifestyle Story)
@@ -34,7 +41,7 @@ export async function triggerAutoFulfill(orderId: string): Promise<void> {
       if (style === 'style3_lifestyle') {
         console.log(`[${jobId}] Generating LifestyleDirectorPlan via Gemini for ${order.photo_original_name}...`);
         const lifestylePlan: LifestyleDirectorPlan = await generateLifestyleDirectorPlan(
-          photoPath,
+          photoPaths,
           order.brief || 'Produce a high-end commercial lifestyle ad for this product.',
           order.photo_original_name,
           jobId
@@ -45,15 +52,18 @@ export async function triggerAutoFulfill(orderId: string): Promise<void> {
         const targetVideoPath = path.join(process.cwd(), 'uploads', 'videos', videoFilename);
 
         const tempPlanPath = path.join(process.cwd(), `temp_plan_${jobId}.json`);
-        fs.writeFileSync(tempPlanPath, JSON.stringify(lifestylePlan, null, 2));
+        fs.writeFileSync(
+          tempPlanPath,
+          JSON.stringify({ ...lifestylePlan, photo_paths: photoPaths, jobId }, null, 2)
+        );
 
         const lifestyleScript = path.join(process.cwd(), 'lifestyle_video_engine.py');
-        console.log(`[${jobId}] Executing reference-anchored lifestyle video engine...`);
+        console.log(`[${jobId}] Executing reference-anchored lifestyle video engine with ${photoPaths.length} photo(s)...`);
 
         try {
           await execFileAsync('python', [
             lifestyleScript,
-            photoPath,
+            photoPaths[0],
             tempPlanPath,
             targetVideoPath,
             jobId,
@@ -87,7 +97,7 @@ export async function triggerAutoFulfill(orderId: string): Promise<void> {
             section_title: lifestylePlan.environment,
             cta_text: lifestylePlan.end_card_cta,
             summary_stats: [
-              { index: '01', value: '10s', sub: 'Duration' },
+              { index: '01', value: `${photoPaths.length} Angle${photoPaths.length > 1 ? 's' : ''}`, sub: 'Multi-Perspective' },
               { index: '02', value: '9:16', sub: 'Aspect Ratio' },
               { index: '03', value: '4K/HD', sub: 'Native Audio' },
             ],
@@ -116,35 +126,39 @@ export async function triggerAutoFulfill(orderId: string): Promise<void> {
       }
 
       // =========================================================================
-      // STYLES 1 & 2: Explainer & Spotlight
+      // STYLES 1 & 2: Explainer & Spotlight (Multi-Angle)
       // =========================================================================
-      // 2. Generate strict AdBlueprint via Gemini API Structured Outputs (NEVER returns dummy/hardcoded fallbacks)
       const blueprint: AdBlueprint = await generateAdBlueprint(
-        photoPath,
+        photoPaths,
         order.brief || 'Produce a high-end commercial ad for this product.',
         style,
         order.photo_original_name,
         jobId
       );
 
-      console.log(`[${jobId}] AdBlueprint generated: category="${blueprint.product_category}", framing="${blueprint.framing_mode}", accent="${blueprint.palette.accent_color}"`);
+      console.log(
+        `[${jobId}] AdBlueprint generated: category="${blueprint.product_category}", framing="${blueprint.framing_mode}", accent="${blueprint.palette.accent_color}", angles=${blueprint.photo_analysis?.length || 1}`
+      );
 
       ensureUploadDirs();
 
       const videoFilename = `video_ad_${orderId}_${Date.now()}.mp4`;
       const targetVideoPath = path.join(process.cwd(), 'uploads', 'videos', videoFilename);
 
-      // 3. Render real custom video ad from the uploaded product photo using our multi-style renderer
+      // 3. Render real custom video ad from the uploaded product photos using our multi-style renderer
       const tempMetaPath = path.join(process.cwd(), `temp_meta_${jobId}.json`);
-      fs.writeFileSync(tempMetaPath, JSON.stringify({ ...blueprint, jobId }, null, 2));
+      fs.writeFileSync(
+        tempMetaPath,
+        JSON.stringify({ ...blueprint, photo_paths: photoPaths, jobId }, null, 2)
+      );
 
       const renderScript = path.join(process.cwd(), 'render_video_engine.py');
-      console.log(`[${jobId}] Rendering custom video ad in style: ${style}...`);
+      console.log(`[${jobId}] Rendering multi-angle video ad in style: ${style}...`);
 
       try {
         await execFileAsync('python', [
           renderScript,
-          photoPath,
+          photoPaths[0],
           tempMetaPath,
           targetVideoPath,
           style,

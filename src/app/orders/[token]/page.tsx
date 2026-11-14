@@ -19,6 +19,13 @@ import {
   AlertCircle,
 } from 'lucide-react';
 
+interface PhotoAngleItem {
+  index: number;
+  url: string;
+  originalName: string;
+  size: number;
+}
+
 interface OrderData {
   id: string;
   token: string;
@@ -28,6 +35,7 @@ interface OrderData {
   photoUrl: string;
   photoOriginalName: string;
   photoSize: number;
+  photos?: PhotoAngleItem[];
   videoUrl: string | null;
   videoDownloadUrl: string | null;
   videoOriginalName: string | null;
@@ -408,11 +416,35 @@ export default function OrderStatusPage() {
             </div>
           </div>
 
-          {/* Specifications */}
-          <div className="bg-white p-6 rounded-3xl border border-border shadow-card space-y-3">
+          {/* Specifications & Uploaded Angles */}
+          <div className="bg-white p-6 rounded-3xl border border-border shadow-card space-y-4">
             <span className="text-xs font-semibold uppercase tracking-wider text-ink-muted block">
-              Specifications
+              Specifications & Photos
             </span>
+
+            {order.photos && order.photos.length > 1 && (
+              <div className="space-y-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted block">
+                  Uploaded Product Angles ({order.photos.length})
+                </span>
+                <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-thin">
+                  {order.photos.map((p, idx) => (
+                    <div
+                      key={p.url}
+                      className="relative shrink-0 w-20 h-20 rounded-xl overflow-hidden border border-border shadow-sm group"
+                    >
+                      <img src={p.url} alt={`Angle ${idx + 1}`} className="w-full h-full object-cover" />
+                      <div className="absolute top-1 left-1">
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-black/60 text-white backdrop-blur-md uppercase">
+                          {idx === 0 ? 'Hero' : `#${idx + 1}`}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div className="p-3 rounded-xl bg-canvas-subtle border border-border/60">
                 <span className="text-ink-muted block mb-1">Source Packshot</span>
@@ -441,6 +473,7 @@ export default function OrderStatusPage() {
           <div className="w-full flex flex-col items-center">
             <AdPreviewFrame
               photoUrl={order.photoUrl}
+              photoUrls={order.photos?.map((p) => p.url) || [order.photoUrl]}
               videoUrl={order.videoUrl}
               briefText={order.brief}
               adMetadata={order.adMetadata}

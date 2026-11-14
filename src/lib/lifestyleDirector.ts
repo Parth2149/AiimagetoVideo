@@ -43,7 +43,7 @@ export const LIFESTYLE_DIRECTOR_SCHEMA = {
 };
 
 export async function generateLifestyleDirectorPlan(
-  photoPath: string,
+  photoPaths: string | string[],
   userBrief: string,
   productName: string = '',
   externalJobId?: string
@@ -55,30 +55,51 @@ export async function generateLifestyleDirectorPlan(
     throw new Error(`[Job ${jobId}] GEMINI_API_KEY is not configured in environment.`);
   }
 
-  if (!fs.existsSync(photoPath)) {
-    throw new Error(`[Job ${jobId}] Uploaded photo does not exist at ${photoPath}`);
+  const paths = Array.isArray(photoPaths) ? photoPaths : [photoPaths];
+  if (paths.length === 0) {
+    throw new Error(`[Job ${jobId}] No product photos provided for lifestyle director.`);
   }
 
-  // 1. Normalize ANY image in memory using Sharp into standard RGB JPEG bytes
-  const rawFileBuffer = fs.readFileSync(photoPath);
-  const hash = crypto.createHash('sha256').update(rawFileBuffer).digest('hex').substring(0, 16);
+  // 1. Normalize all N images in memory using Sharp into standard RGB JPEG bytes (max 1024px for rapid vision analysis)
+  const photoBuffers: Buffer[] = [];
+  for (let idx = 0; idx < paths.length; idx++) {
+    const p = paths[idx];
+    if (!fs.existsSync(p)) {
+      throw new Error(`[Job ${jobId}] Uploaded photo does not exist at ${p}`);
+    }
+    const rawBuffer = fs.readFileSync(p);
+    const jpegBuffer = await sharp(rawBuffer)
+      .rotate()
+      .resize(1024, 1024, { fit: 'inside', withoutEnlargement: true })
+      .toFormat('jpeg', { quality: 88 })
+      .toBuffer();
+    photoBuffers.push(jpegBuffer);
+  }
 
-  const jpegBuffer = await sharp(rawFileBuffer)
-    .toFormat('jpeg', { quality: 92 })
-    .toBuffer();
+  const N = photoBuffers.length;
+  console.log(`[Job ${jobId}] Lifestyle Director: Processing ${N} uploaded product photo(s)...`);
 
-  const imgMeta = await sharp(jpegBuffer).metadata();
-  console.log(
-    `[Job ${jobId}] Lifestyle Director: Image normalized: ${imgMeta.width}x${imgMeta.height}, bytes: ${jpegBuffer.length}, sha256: ${hash}, original: ${productName || photoPath}`
-  );
+  const parts: any[] = [];
+  for (let i = 0; i < N; i++) {
+    parts.push({
+      text: i === 0 ? 'Image 0 (Hero):' : `Image ${i}:`,
+    });
+    parts.push({
+      inline_data: {
+        mime_type: 'image/jpeg',
+        data: photoBuffers[i].toString('base64'),
+      },
+    });
+  }
 
-  // 2. Strict Lifestyle Director Prompt
+  // 2. Strict Lifestyle Director Prompt for multi-angle inputs
   const prompt = `You are an award-winning cinematic commercial film director creating a 10-second lifestyle story ad.
-Analyze ONLY the attached product image.
+You have been provided ${N} reference photo(s) of the SAME product from different angles/views.
+Analyze ALL ${N} attached image(s).
 User Creative Brief: "${userBrief || 'Produce a high-end commercial lifestyle ad for this product.'}".
 
 Generate a natural, human-centric 10-second lifestyle video plan:
-1. product_subject: Exact description of the uploaded product (shape, colors, packaging/plating, key visual details so the video model preserves it 100%).
+1. product_subject: Exact description of the uploaded product synthesized across all ${N} reference photos (shape, colors, packaging/plating, key visual details from all angles so the video model preserves it 100%).
 2. environment: Authentic real-world setting suited to this specific product (e.g., sunlit wooden kitchen/cafe table for food, golden-hour highway/depot for a truck, bright vanity for skincare, modern desk for tech).
 3. talent_and_action: Natural, candid human interaction in 3 beats:
    - beat_1_0_to_3s: Framing the exact product in-scene as a person enters/reaches for it.
@@ -87,13 +108,12 @@ Generate a natural, human-centric 10-second lifestyle video plan:
 4. audio_direction: Warm, natural conversational voiceover script (16–22 words max) + subtle ambient room/environment sound (no loud overpowering music).
 5. end_card_cta: 1 short, punchy editorial sentence (6–9 words max, matching the user's Creative Brief CTA, e.g., "Fresh. Savory. Delicious. Order Yours Today.").`;
 
+  parts.push({ text: prompt });
+
   const payload = {
     contents: [
       {
-        parts: [
-          { inline_data: { mime_type: 'image/jpeg', data: jpegBuffer.toString('base64') } },
-          { text: prompt },
-        ],
+        parts,
       },
     ],
     generationConfig: {
@@ -121,7 +141,7 @@ Generate a natural, human-centric 10-second lifestyle video plan:
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(25000),
+        signal: AbortSignal.timeout(45000),
       });
 
       if (res.ok) {
