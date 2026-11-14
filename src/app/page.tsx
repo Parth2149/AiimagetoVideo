@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowRight,
-  Sparkles,
   Play,
   CheckCircle2,
   Layers,
@@ -149,14 +148,6 @@ export default function HomePage() {
       {/* =================================================================== */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 space-y-10 text-center">
         <div className="space-y-6 max-w-4xl mx-auto">
-          {/* Eyebrow Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold text-ink bg-white border border-border shadow-sm">
-            <Sparkles className="w-3.5 h-3.5 text-accent-peach animate-spin-slow" />
-            <span>Autonomous Commercial Video Studio</span>
-            <span className="text-ink-muted">•</span>
-            <span className="text-emerald-700 font-bold">10-Second Generation</span>
-          </div>
-
           {/* Main H1 */}
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-ink leading-[1.08]">
             Turn Any Product Photo into a{' '}

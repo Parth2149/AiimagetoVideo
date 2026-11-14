@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Film, Sparkles, ArrowUpRight, ShieldCheck, Heart } from 'lucide-react';
+import { Film, ArrowUpRight, ShieldCheck, Heart } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -18,12 +18,8 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-xs text-ink-secondary leading-relaxed">
-              Autonomous commercial studio transforming product photography into high-converting 9:16 video ads in seconds.
+              Commercial motion studio transforming product photography into high-converting 9:16 video ads for social commerce.
             </p>
-            <div className="flex items-center gap-2 pt-1 text-xs text-emerald-800">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="font-medium text-[11px]">Production Cluster Active (99.98% Uptime)</span>
-            </div>
           </div>
 
           {/* Product & Studio */}

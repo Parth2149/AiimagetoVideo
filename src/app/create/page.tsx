@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import FileDropzone from '@/components/FileDropzone';
 import AdPreviewFrame from '@/components/AdPreviewFrame';
-import { ArrowRight, Sparkles, Loader2, AlertCircle, Play, Eye, X, Check, Layers, Film, Compass, Smartphone, Monitor, Info } from 'lucide-react';
+import { ArrowRight, Loader2, AlertCircle, Play, Eye, X, Check, Layers, Film, Compass, Smartphone, Monitor, Info } from 'lucide-react';
 import { VideoStyle } from '@/lib/db';
 
 const SAMPLES = [

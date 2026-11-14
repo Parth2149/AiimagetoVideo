@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     template: '%s | Videlto Creative Studio',
   },
   description:
-    'Autonomous commercial director that turns any product photo into an editorial 9:16 vertical video ad for Instagram Reels, TikTok, and YouTube Shorts. Zero templates, authentic product fidelity.',
+    'Commercial video ad platform turning product photography into editorial 9:16 vertical video ads for Instagram Reels, TikTok, and YouTube Shorts. Authentic product fidelity and custom motion.',
   keywords: [
     'commercial video ad creator',
     'product photo to video ad',
@@ -96,7 +96,7 @@ const jsonLd = {
         priceCurrency: 'USD',
       },
       description:
-        'Autonomous commercial video studio transforming static product photos into 9:16 social video ads.',
+        'Commercial video ad platform transforming static product photos into 9:16 social video ads.',
       url: siteUrl,
     },
     {

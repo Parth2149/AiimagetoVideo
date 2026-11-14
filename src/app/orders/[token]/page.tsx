@@ -12,7 +12,6 @@ import {
   Download,
   ArrowLeft,
   RefreshCw,
-  Sparkles,
   Palette,
   FileText,
   Cpu,

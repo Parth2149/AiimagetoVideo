@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import SatinShader from './SatinShader';
-import { Volume2, VolumeX, ShoppingBag, Sparkles } from 'lucide-react';
-import { AdCreativeMetadata } from '@/lib/db';
+import { Volume2, VolumeX, ShoppingBag, Film } from 'lucide-react';
+import type { AdCreativeMetadata } from '@/lib/db';
 
 interface AdPreviewFrameProps {
   photoUrl: string | null;
@@ -93,7 +93,7 @@ export default function AdPreviewFrame({
                 />
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-[#FAF8F5]">
-                  <Sparkles className="w-8 h-8 text-ink-muted mb-2 opacity-50" />
+                  <Film className="w-8 h-8 text-ink-muted mb-2 opacity-50" />
                   <p className="text-xs text-ink-secondary">Upload a product photo to see live ad mockup</p>
                 </div>
               )}

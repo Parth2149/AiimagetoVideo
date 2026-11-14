@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Film, Sparkles, ArrowRight } from 'lucide-react';
+import { Film, ArrowRight } from 'lucide-react';
 
 export default function Header() {
   return (
@@ -44,10 +44,6 @@ export default function Header() {
 
         {/* Right Action */}
         <div className="flex items-center gap-3">
-          <div className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium text-emerald-800 bg-emerald-50 border border-emerald-200/80 shadow-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Studio Active</span>
-          </div>
           <Link
             href="/create"
             className="btn-glossy px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm"

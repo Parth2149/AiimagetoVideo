@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { Film, Sparkles, CheckCircle2, ArrowRight, ShieldCheck, Zap, Layers, Cpu, Eye, Compass, Award } from 'lucide-react';
+import { Film, CheckCircle2, ArrowRight, ShieldCheck, Zap, Layers, Cpu, Eye, Compass, Award } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'About Videlto — Autonomous Commercial Video Ad Director',
@@ -16,11 +16,10 @@ export default function AboutPage() {
   return (
     <div className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-12 sm:py-20 space-y-20">
       {/* 1. Hero Section */}
-      <section className="space-y-6 text-center sm:text-left">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold text-accent-blue bg-blue-50 border border-blue-200/80">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Our Mission & Technology</span>
-        </div>
+      <section className="space-y-4 text-center sm:text-left">
+        <span className="text-xs font-bold uppercase tracking-widest text-accent-blue block">
+          Our Mission & Platform
+        </span>
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-ink leading-tight">
           Democratizing Studio-Quality Video Advertising for Every Brand
         </h1>
@@ -109,8 +108,8 @@ export default function AboutPage() {
 
           <div className="p-6 rounded-2xl bg-white border border-emerald-300 shadow-sm space-y-3">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Videlto Autonomous Studio</span>
+              <Film className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Videlto Motion Studio</span>
             </span>
             <ul className="space-y-2 text-xs text-ink-secondary leading-relaxed">
               <li className="flex items-start gap-2">
