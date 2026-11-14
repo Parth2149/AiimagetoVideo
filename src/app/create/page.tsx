@@ -137,7 +137,7 @@ export default function CreateAdPage() {
       {/* Page Header */}
       <div className="mb-8 space-y-2">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-ink-muted">
-          <Film className="w-4 h-4 text-accent-blue" />
+          <img src="/logo.png" alt="Videlto" className="w-4 h-4 object-contain" />
           <span>Videlto Studio • Commercial Video Director</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">

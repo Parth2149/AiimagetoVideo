@@ -9,11 +9,13 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Info */}
           <div className="md:col-span-1 space-y-3">
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-ink flex items-center justify-center text-white shadow-sm">
-                <Film className="w-4 h-4" />
-              </div>
-              <span className="font-semibold text-base tracking-tight text-ink">
+            <Link href="/" className="flex items-center gap-3 group">
+              <img
+                src="/logo.png"
+                alt="Videlto Logo"
+                className="h-10 sm:h-12 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
+              />
+              <span className="font-extrabold text-xl tracking-tight text-ink">
                 Videlto
               </span>
             </Link>

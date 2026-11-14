@@ -1,24 +1,26 @@
 import React from 'react';
 import Link from 'next/link';
-import { Film, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export default function Header() {
   return (
     <header className="w-full border-b border-border/80 bg-canvas/90 backdrop-blur-md sticky top-0 z-40 transition-colors">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        {/* Brand */}
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-lg bg-ink flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
-            <Film className="w-4 h-4" />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-semibold text-sm tracking-tight text-ink flex items-center gap-1.5">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-18 sm:h-20 flex items-center justify-between">
+        {/* Brand with Big Prominent Logo */}
+        <Link href="/" className="flex items-center gap-3 sm:gap-3.5 group py-1">
+          <img
+            src="/logo.png"
+            alt="Videlto Logo"
+            className="h-10 sm:h-12 w-auto object-contain drop-shadow-sm transition-transform duration-200 group-hover:scale-105"
+          />
+          <div className="flex flex-col justify-center">
+            <span className="font-extrabold text-lg sm:text-xl tracking-tight text-ink flex items-center gap-1.5 leading-tight">
               Videlto
               <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 text-stone-700 bg-stone-100 rounded border border-stone-200 font-semibold tracking-wider">
                 Studio
               </span>
             </span>
-            <span className="text-[10px] text-ink-muted hidden sm:inline">Product Motion & Video Ads</span>
+            <span className="text-[11px] text-ink-muted hidden sm:inline font-medium leading-none">Commercial Motion Studio</span>
           </div>
         </Link>
 

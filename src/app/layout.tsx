@@ -77,6 +77,15 @@ export const metadata: Metadata = {
     images: ['/verification_snapshots/create_page_presets_verified.png'],
     creator: '@videlto',
   },
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.png', type: 'image/png', sizes: '512x512' },
+    ],
+    apple: [
+      { url: '/apple-icon.png', sizes: '192x192', type: 'image/png' },
+    ],
+  },
   alternates: {
     canonical: siteUrl,
   },
