@@ -1,15 +1,13 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import { UploadCloud, Image as ImageIcon, X, Plus, ChevronLeft, ChevronRight, Star, Layers } from 'lucide-react';
+import { UploadCloud, Image as ImageIcon, X, Plus, ChevronLeft, ChevronRight, Layers } from 'lucide-react';
 
 interface FileDropzoneProps {
   files: File[];
   previewUrls: string[];
   onFilesChange: (files: File[], previewUrls: string[]) => void;
   activeLabel?: string;
-  isUsingSample?: boolean;
-  onUseSample?: () => void;
   maxFiles?: number;
 }
 
@@ -17,9 +15,7 @@ export default function FileDropzone({
   files,
   previewUrls,
   onFilesChange,
-  activeLabel = 'Product Photo',
-  isUsingSample = false,
-  onUseSample,
+  activeLabel = 'No Photos Uploaded',
   maxFiles = 5,
 }: FileDropzoneProps) {
   const [isDragOver, setIsDragOver] = useState(false);
@@ -101,8 +97,8 @@ export default function FileDropzone({
     onFilesChange(nextFiles, nextUrls);
   };
 
-  const hasPhotos = files.length > 0 || (isUsingSample && previewUrls.length > 0);
-  const photoCount = files.length > 0 ? files.length : isUsingSample ? previewUrls.length : 0;
+  const hasPhotos = files.length > 0;
+  const photoCount = files.length;
 
   return (
     <div className="space-y-3">
@@ -155,10 +151,10 @@ export default function FileDropzone({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-ink">
-                  {isUsingSample ? activeLabel : `${photoCount} Product Angle${photoCount > 1 ? 's' : ''} Ready`}
+                  {photoCount === 1 ? `${files[0]?.name || 'Hero Photo'} (Hero Angle)` : `${photoCount} Product Angles Ready`}
                 </span>
                 <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                  {isUsingSample ? 'Sample Active' : `${photoCount}/${maxFiles} Uploaded`}
+                  {photoCount}/{maxFiles} Uploaded
                 </span>
               </div>
 
@@ -297,7 +293,7 @@ export default function FileDropzone({
           </div>
         ) : (
           /* Empty state */
-          <div className="py-4 flex flex-col items-center justify-center gap-2">
+          <div className="py-6 flex flex-col items-center justify-center gap-2.5 text-center">
             <div className="w-12 h-12 rounded-2xl bg-stone-100 flex items-center justify-center text-ink-secondary group-hover:scale-105 group-hover:bg-blue-50 group-hover:text-accent-blue transition-all">
               <UploadCloud className="w-6 h-6" />
             </div>
@@ -305,8 +301,8 @@ export default function FileDropzone({
               <p className="text-sm font-semibold text-ink">
                 Drop 1 to 5 product photos here, or <span className="text-accent-blue underline">browse</span>
               </p>
-              <p className="text-xs text-ink-muted mt-0.5">
-                Upload multiple angles (hero, side, close-up, packaging) for a multi-angle commercial ad
+              <p className="text-xs text-ink-muted mt-1 max-w-sm">
+                Upload raw photos of your product (hero angle, side view, details, packaging) • JPG, PNG, WebP, JFIF
               </p>
             </div>
           </div>

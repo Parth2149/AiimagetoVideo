@@ -15,6 +15,7 @@ interface AdPreviewFrameProps {
   ctaText?: string;
   brandTag?: string;
   isStatusPage?: boolean;
+  aspectRatio?: '9:16' | '16:9';
 }
 
 export default function AdPreviewFrame({
@@ -27,6 +28,7 @@ export default function AdPreviewFrame({
   ctaText = 'Order Today',
   brandTag = 'STUDIO SELECT',
   isStatusPage = false,
+  aspectRatio = '9:16',
 }: AdPreviewFrameProps) {
   const [isMuted, setIsMuted] = useState(true);
   const [activeCycleIndex, setActiveCycleIndex] = useState(0);
@@ -38,7 +40,9 @@ export default function AdPreviewFrame({
     ? [photoUrl]
     : [];
 
-  // Gently cycle preview photos every 3 seconds if multiple photos are present
+  const hasPhotos = allUrls.length > 0;
+
+  // Gently cycle preview photos every 3.2 seconds if multiple photos are present
   useEffect(() => {
     if (allUrls.length <= 1) return;
     const interval = setInterval(() => {
@@ -47,31 +51,41 @@ export default function AdPreviewFrame({
     return () => clearInterval(interval);
   }, [allUrls.length]);
 
-  const activeDisplayPhoto = allUrls.length > 0 ? allUrls[activeCycleIndex % allUrls.length] : null;
+  const activeDisplayPhoto = hasPhotos ? allUrls[activeCycleIndex % allUrls.length] : null;
 
-  // Dynamic human-directed values
+  // Dynamic values
   const displayBrand = adMetadata?.brand_name || brandTag;
-  const displayBadge = adMetadata?.badge_tag || 'FRESHLY CRAFTED';
-  const displayHeadline = adMetadata?.headline || adHeadline || 'Crafted with precision.';
+  const displayBadge = adMetadata?.badge_tag || 'COMMERCIAL SPOTLIGHT';
+  const displayHeadline = adMetadata?.headline || adHeadline || (
+    hasPhotos ? 'Product Showcase in Motion' : 'Commercial Video Studio'
+  );
   const displaySubheadline = adMetadata?.subheadline || (
-    briefText || 'Handcrafted fresh daily with premium ingredients.'
+    briefText.trim()
+      ? briefText.trim()
+      : 'Vision Director will analyze your photo & craft custom copy'
   );
   const displayCta = adMetadata?.cta || ctaText;
   const accentColor = adMetadata?.accent_color || '#FBBF24';
 
+  const isLandscape = aspectRatio === '16:9';
+
   return (
-    <div className="relative w-full max-w-[360px] mx-auto select-none">
+    <div className={`relative w-full mx-auto select-none transition-all duration-300 ${
+      isLandscape ? 'max-w-[480px]' : 'max-w-[340px]'
+    }`}>
       {/* Satin color wash shader positioned BEHIND the preview frame */}
       <div className="absolute -inset-6 sm:-inset-8 z-0">
         <SatinShader />
       </div>
 
-      {/* Portrait 9:16 Ad Preview Phone/Frame */}
+      {/* Ad Preview Frame (Dynamic 9:16 or 16:9) */}
       <div className="relative z-10 rounded-[32px] p-2.5 sm:p-3 bg-white/80 backdrop-blur-md border border-[#E6E2D9] shadow-floating transition-all duration-300">
-        <div className="relative w-full aspect-[9/16] rounded-[24px] overflow-hidden bg-stone-900 border border-stone-200/40 flex flex-col justify-between shadow-inner">
+        <div className={`relative w-full rounded-[24px] overflow-hidden bg-stone-900 border border-stone-200/40 flex flex-col justify-between shadow-inner transition-all duration-300 ${
+          isLandscape ? 'aspect-[16/9]' : 'aspect-[9/16]'
+        }`}>
 
           {videoUrl ? (
-            /* Finished Video Ad Player - video contains full animated typography & graphic overlays */
+            /* Finished Video Ad Player */
             <div className="relative w-full h-full bg-black group">
               <video
                 src={videoUrl}
@@ -83,7 +97,7 @@ export default function AdPreviewFrame({
                 controls={false}
               />
 
-              {/* Audio Toggle & Playback Status */}
+              {/* Audio Toggle */}
               <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
                 <button
                   type="button"
@@ -95,17 +109,17 @@ export default function AdPreviewFrame({
                 </button>
               </div>
 
-              {/* Discreet Live Indicator */}
+              {/* Live Format Indicator */}
               <div className="absolute top-4 left-4 z-20 pointer-events-none">
                 <span className="px-2.5 py-1 rounded-full text-[9px] font-bold tracking-widest uppercase bg-black/40 backdrop-blur-md text-white/90 border border-white/15 shadow-sm">
-                  HD 9:16
+                  {isLandscape ? 'HD 16:9' : 'HD 9:16'}
                 </span>
               </div>
             </div>
           ) : (
-            /* Still Ad Preview with Real Human-Directed Typography & Glassmorphism */
+            /* Live Mockup Frame */
             <div className="relative w-full h-full flex flex-col justify-between bg-stone-100">
-              {/* Product Photo with crossfade transition */}
+              {/* Product Photo with gentle crossfade */}
               {activeDisplayPhoto ? (
                 <img
                   key={activeDisplayPhoto}
@@ -114,14 +128,20 @@ export default function AdPreviewFrame({
                   className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 animate-fade-in"
                 />
               ) : (
+                /* Clean Empty State */
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-[#FAF8F5]">
-                  <Film className="w-8 h-8 text-ink-muted mb-2 opacity-50" />
-                  <p className="text-xs text-ink-secondary">Upload product photos to see live ad mockup</p>
+                  <div className="w-12 h-12 rounded-2xl bg-stone-100 flex items-center justify-center text-ink-muted mb-2.5 border border-border/80">
+                    <Film className="w-6 h-6 opacity-60" />
+                  </div>
+                  <p className="text-xs font-semibold text-ink">Upload your product photo(s) to preview your ad</p>
+                  <p className="text-[11px] text-ink-muted mt-1 max-w-[240px]">
+                    Accepts 1 to 5 product angles • Visualizing {isLandscape ? '16:9 Landscape' : '9:16 Vertical'} format
+                  </p>
                 </div>
               )}
 
               {/* Top Ad Header Pill + Angle Badge */}
-              <div className="relative z-10 p-4 pt-5 flex items-center justify-between">
+              <div className="relative z-10 p-3 sm:p-4 pt-4 flex items-center justify-between">
                 <span className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-black/45 backdrop-blur-md text-white border border-white/20 shadow-sm">
                   {displayBrand}
                 </span>
@@ -140,15 +160,21 @@ export default function AdPreviewFrame({
               </div>
 
               {/* Bottom Agency-Grade Graphic Text Box */}
-              <div className="relative z-10 p-5 bg-gradient-to-t from-black/85 via-black/45 to-transparent flex flex-col gap-3">
-                <div className="p-3.5 rounded-2xl bg-black/45 backdrop-blur-md border border-white/15 space-y-1 shadow-lg">
+              <div className={`relative z-10 bg-gradient-to-t from-black/85 via-black/45 to-transparent flex flex-col gap-2 ${
+                isLandscape ? 'p-3' : 'p-4 sm:p-5'
+              }`}>
+                <div className={`rounded-2xl bg-black/45 backdrop-blur-md border border-white/15 space-y-1 shadow-lg ${
+                  isLandscape ? 'p-2.5' : 'p-3.5'
+                }`}>
                   <span
                     className="text-[9px] tracking-widest font-bold uppercase drop-shadow block"
                     style={{ color: accentColor }}
                   >
                     {displayBadge}
                   </span>
-                  <h3 className="text-white text-base font-semibold leading-tight drop-shadow-sm font-sans">
+                  <h3 className={`text-white font-semibold leading-tight drop-shadow-sm font-sans ${
+                    isLandscape ? 'text-sm' : 'text-base'
+                  }`}>
                     {displayHeadline}
                   </h3>
                   <p className="text-white/80 text-[11px] leading-relaxed line-clamp-2">
@@ -157,12 +183,12 @@ export default function AdPreviewFrame({
                 </div>
 
                 <div className="flex items-center justify-between pt-0.5">
-                  <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold bg-white text-ink shadow-md hover:bg-stone-100 transition-colors cursor-pointer">
+                  <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-ink shadow-md hover:bg-stone-100 transition-colors cursor-pointer">
                     <ShoppingBag className="w-3.5 h-3.5 text-ink" />
                     <span>{displayCta}</span>
                   </div>
                   <div className="flex items-center gap-1 text-[10px] text-white/75 uppercase tracking-wider font-mono">
-                    <span>9:16 HD</span>
+                    <span>{isLandscape ? '16:9 HD' : '9:16 HD'}</span>
                   </div>
                 </div>
               </div>

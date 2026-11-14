@@ -481,8 +481,8 @@ export default function OrderStatusPage() {
             />
             <p className="text-xs text-ink-muted mt-5 text-center font-medium">
               {order.status === 'ready'
-                ? '✨ Finished 9:16 video ad playing above • Tap audio icon to listen'
-                : 'Rendering live vertical video ad with human-directed typography...'}
+                ? 'Finished commercial video ad playing above • Tap audio icon to listen'
+                : 'Rendering live video ad with human-directed typography...'}
             </p>
           </div>
         </div>

@@ -1,42 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import FileDropzone from '@/components/FileDropzone';
 import AdPreviewFrame from '@/components/AdPreviewFrame';
-import { ArrowRight, Loader2, AlertCircle, Play, Eye, X, Check, Layers, Film, Compass, Smartphone, Monitor, Info } from 'lucide-react';
+import { ArrowRight, Loader2, AlertCircle, Play, Eye, X, Check, Film, Smartphone, Monitor, Info } from 'lucide-react';
 import { VideoStyle } from '@/lib/db';
-
-const SAMPLES = [
-  {
-    id: 'pizza',
-    label: '🍕 Pepperoni Pizza (2 Angles)',
-    paths: ['/images.jfif', '/artisan-pizza.jpg'],
-    brief: 'Artisan wood-fired pepperoni pizza ad. End with Order Hot Now.',
-    style: 'style1_explainer' as VideoStyle,
-  },
-  {
-    id: 'salad',
-    label: '🥗 Salad Bowl',
-    paths: ['/salad-bowl.jpg'],
-    brief: 'Deconstruct this fresh signature salad bowl with avocado and garden corn. End with Order Fresh Today.',
-    style: 'style1_explainer' as VideoStyle,
-  },
-  {
-    id: 'truck',
-    label: '🚚 Fleet Truck',
-    paths: ['/commercial-truck.jpg'],
-    brief: 'Commercial fleet heavy haulage rig ad. End with Built for the Long Haul.',
-    style: 'style3_lifestyle' as VideoStyle,
-  },
-  {
-    id: 'burger',
-    label: '🍔 Artisan Burger',
-    paths: ['/burger-and-fries.jpg'],
-    brief: 'Artisanal burger stacked with crisp lettuce and golden cut fries. End with Order Today.',
-    style: 'style2_spotlight' as VideoStyle,
-  },
-];
 
 interface StyleConfig {
   id: VideoStyle;
@@ -54,31 +23,31 @@ const VIDEO_STYLES: StyleConfig[] = [
     id: 'style1_explainer',
     title: '1. Explainer & Detailing',
     badge: 'Artisanal Callouts',
-    description: 'Numbered ingredient callouts, animated pointer lines, and deconstructed features with elegant serif typography.',
-    placeholder: 'Deconstruct this dish. Detail the fresh avocado slices, ripe tomatoes, and artisan seasonings.',
+    description: 'Numbered ingredient/spec callouts, animated pointer lines, and deconstructed features with elegant typography.',
+    placeholder: 'Highlight key craftsmanship, specs, or materials. End with a clear call-to-action.',
     exampleVideo: '/examples/style1_explainer.mp4',
     accent: '#4E7D56',
-    bestFor: 'Food menus, electronics, cosmetics, apparel craftsmanship',
+    bestFor: 'Food menus, consumer products, electronics, cosmetics, apparel craftsmanship',
   },
   {
     id: 'style2_spotlight',
     title: '2. Editorial Agency Spotlight',
     badge: 'High-Impact Social Ad',
-    description: 'Cinematic 9:16 push-in zoom, ambient backdrop blur, punchy human copywriting, and glassmorphic card.',
-    placeholder: 'Make a 10-second Instagram ad for this product. Bold hook, end with ‘Order today’.',
+    description: 'Cinematic push-in zoom, ambient backdrop blur, punchy commercial copywriting, and glassmorphic card.',
+    placeholder: 'Direct-response offer, limited-time promotion, or bold product hook. End with ‘Shop Now’.',
     exampleVideo: '/examples/style2_spotlight.mp4',
     accent: '#E65100',
-    bestFor: 'E-commerce sales, limited drops, direct-response offers',
+    bestFor: 'E-commerce sales, product launches, limited drops, direct-response offers',
   },
   {
     id: 'style3_lifestyle',
     title: '3. Cinematic Lifestyle Story',
     badge: 'Human Connection',
-    description: 'Warm candid atmosphere, authentic setting, and 3-beat human interaction storyboard with natural audio & voiceover.',
-    placeholder: 'Tell an authentic story about enjoying this product. Focus on taste, ritual, and shared moments.',
+    description: 'Authentic setting, candid atmosphere, and 3-beat human interaction storyboard with natural audio & voiceover.',
+    placeholder: 'Tell a story about enjoying this product in an authentic daily setting or ritual.',
     exampleVideo: '/examples/style3_lifestyle.mp4',
     accent: '#D97706',
-    bestFor: 'Lifestyle brands, dining experiences, vehicles, wellness',
+    bestFor: 'Lifestyle brands, dining experiences, vehicles, wellness, apparel',
   },
 ];
 
@@ -92,11 +61,10 @@ const TONE_PRESETS = [
 export default function CreateAdPage() {
   const router = useRouter();
 
+  // 100% custom user-uploaded photos only (zero preloaded sample state)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [previewUrls, setPreviewUrls] = useState<string[]>(SAMPLES[0].paths);
-  const [activeLabel, setActiveLabel] = useState<string>(SAMPLES[0].label);
-  const [isUsingSample, setIsUsingSample] = useState(true);
-  const [sampleChoice, setSampleChoice] = useState(SAMPLES[0].id);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [activeLabel, setActiveLabel] = useState<string>('No Photos Uploaded');
   const [selectedStyle, setSelectedStyle] = useState<VideoStyle>('style1_explainer');
   const [aspectRatio, setAspectRatio] = useState<'9:16' | '16:9'>('9:16');
   const [brief, setBrief] = useState('');
@@ -108,22 +76,9 @@ export default function CreateAdPage() {
 
   const activeStyleConfig = VIDEO_STYLES.find((s) => s.id === selectedStyle) || VIDEO_STYLES[0];
 
-  const handleSelectSample = (sample: typeof SAMPLES[0]) => {
-    setSelectedFiles([]);
-    setPreviewUrls(sample.paths);
-    setActiveLabel(sample.label);
-    setIsUsingSample(true);
-    setSampleChoice(sample.id);
-    setSelectedStyle(sample.style);
-    if (!brief) {
-      setBrief(sample.brief);
-    }
-  };
-
   const handleFilesChange = (newFiles: File[], newUrls: string[]) => {
     setSelectedFiles(newFiles);
     setPreviewUrls(newUrls);
-    setIsUsingSample(false);
 
     if (newFiles.length === 0) {
       setActiveLabel('No Photos Uploaded');
@@ -138,12 +93,12 @@ export default function CreateAdPage() {
     e.preventDefault();
     setErrorMessage(null);
 
-    const activeBrief = brief.trim() || activeStyleConfig.placeholder;
-
-    if (selectedFiles.length === 0 && !isUsingSample) {
-      setErrorMessage('Please upload 1 to 5 product photos or select one of the instant samples above.');
+    if (selectedFiles.length === 0) {
+      setErrorMessage('Please upload at least 1 product photo to generate your commercial ad.');
       return;
     }
+
+    const activeBrief = brief.trim() || activeStyleConfig.placeholder;
 
     setIsSubmitting(true);
 
@@ -153,19 +108,8 @@ export default function CreateAdPage() {
       formData.append('videoStyle', selectedStyle);
       formData.append('aspectRatio', aspectRatio);
 
-      if (selectedFiles.length > 0) {
-        for (const file of selectedFiles) {
-          formData.append('images[]', file);
-        }
-      } else {
-        // Fetch sample files as blobs
-        const sampleObj = SAMPLES.find((s) => s.id === sampleChoice) || SAMPLES[0];
-        for (const p of sampleObj.paths) {
-          const res = await fetch(p);
-          const blob = await res.blob();
-          const fname = p.split('/').pop() || 'sample.jpg';
-          formData.append('images[]', blob, fname);
-        }
+      for (const file of selectedFiles) {
+        formData.append('images[]', file);
       }
 
       const response = await fetch('/api/orders', {
@@ -186,6 +130,8 @@ export default function CreateAdPage() {
     }
   };
 
+  const hasPhotos = selectedFiles.length > 0;
+
   return (
     <div className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12">
       {/* Page Header */}
@@ -198,7 +144,7 @@ export default function CreateAdPage() {
           Create Your Commercial Video Ad
         </h1>
         <p className="text-sm text-ink-secondary max-w-2xl leading-relaxed">
-          Upload any raw product photo. Our creative director analyzes visible features, extracts harmonized color palettes, writes punchy copywriting, and renders a studio-grade 9:16 vertical video ad.
+          Upload 1 to 5 product photos. The Creative Director analyzes your product features, extracts harmonized color palettes, writes punchy copywriting, and renders a studio-grade video ad.
         </p>
       </div>
 
@@ -213,43 +159,15 @@ export default function CreateAdPage() {
                 <span className="text-xs font-bold uppercase tracking-wider text-ink-muted">
                   1. Product Photo Upload
                 </span>
-                <span className="text-[11px] text-ink-faint font-mono">JPG, PNG, WEBP, JFIF</span>
+                <span className="text-[11px] text-ink-faint font-mono">JPG, PNG, WEBP, JFIF (1–5 Photos)</span>
               </div>
 
-              {/* Sample Shortcuts */}
-              <div className="space-y-2">
-                <span className="text-[11px] font-medium text-ink-muted block">
-                  Quick Sample Presets (Click to test instantly):
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {SAMPLES.map((sample) => {
-                    const isSelected = isUsingSample && sampleChoice === sample.id;
-                    return (
-                      <button
-                        key={sample.id}
-                        type="button"
-                        onClick={() => handleSelectSample(sample)}
-                        className={`text-xs px-3 py-1.5 rounded-xl border transition-all ${
-                          isSelected
-                            ? 'bg-ink text-white border-ink shadow-sm scale-102'
-                            : 'bg-canvas-subtle/80 hover:bg-canvas-subtle text-ink-secondary border-border/70'
-                        }`}
-                      >
-                        {sample.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Multi-Angle Dropzone */}
+              {/* Clean Multi-Angle Dropzone */}
               <FileDropzone
                 files={selectedFiles}
                 previewUrls={previewUrls}
                 onFilesChange={handleFilesChange}
                 activeLabel={activeLabel}
-                isUsingSample={isUsingSample}
-                onUseSample={() => handleSelectSample(SAMPLES[0])}
                 maxFiles={5}
               />
             </div>
@@ -326,9 +244,14 @@ export default function CreateAdPage() {
 
             {/* 3. ASPECT RATIO & FORMAT */}
             <div className="bg-white p-5 sm:p-6 rounded-3xl border border-border shadow-card space-y-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-ink-muted block">
-                3. Aspect Ratio & Placement
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink-muted block">
+                  3. Aspect Ratio & Placement
+                </span>
+                <span className="text-[11px] font-mono text-ink-muted">
+                  {aspectRatio === '9:16' ? '1080×1920 (Vertical)' : '1920×1080 (Landscape)'}
+                </span>
+              </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <button
@@ -340,7 +263,7 @@ export default function CreateAdPage() {
                       : 'border-border/80 bg-white hover:bg-canvas-subtle/20'
                   }`}
                 >
-                  <Smartphone className="w-5 h-5 text-ink mt-0.5" />
+                  <Smartphone className="w-5 h-5 text-ink mt-0.5 shrink-0" />
                   <div className="space-y-0.5">
                     <span className="text-xs font-bold text-ink block">9:16 Vertical (Recommended)</span>
                     <span className="text-[11px] text-ink-muted block">Instagram Reels, TikTok, Shorts</span>
@@ -356,7 +279,7 @@ export default function CreateAdPage() {
                       : 'border-border/80 bg-white hover:bg-canvas-subtle/20'
                   }`}
                 >
-                  <Monitor className="w-5 h-5 text-ink mt-0.5" />
+                  <Monitor className="w-5 h-5 text-ink mt-0.5 shrink-0" />
                   <div className="space-y-0.5">
                     <span className="text-xs font-bold text-ink block">16:9 Landscape</span>
                     <span className="text-[11px] text-ink-muted block">YouTube & Website Headers</span>
@@ -377,7 +300,7 @@ export default function CreateAdPage() {
               {/* Tone Presets */}
               <div className="space-y-1.5">
                 <span className="text-[11px] font-medium text-ink-muted block">
-                  Quick Tone Presets:
+                  Tone Presets:
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {TONE_PRESETS.map((preset) => (
@@ -402,8 +325,8 @@ export default function CreateAdPage() {
               />
 
               <div className="flex items-center gap-1.5 text-[11px] text-ink-muted">
-                <Info className="w-3.5 h-3.5 text-accent-blue" />
-                <span>Leave blank to let the creative director compose the optimal commercial copy automatically.</span>
+                <Info className="w-3.5 h-3.5 text-accent-blue shrink-0" />
+                <span>Leave blank to let the creative director compose optimal commercial copy tailored to your product.</span>
               </div>
             </div>
 
@@ -418,14 +341,20 @@ export default function CreateAdPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="btn-glossy w-full py-4 px-6 rounded-2xl font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-lg tracking-wide"
+              disabled={isSubmitting || !hasPhotos}
+              className={`w-full py-4 px-6 rounded-2xl font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 tracking-wide transition-all ${
+                !hasPhotos
+                  ? 'bg-stone-200 text-stone-500 cursor-not-allowed shadow-none'
+                  : 'btn-glossy shadow-lg cursor-pointer'
+              }`}
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
                   <span>Directing & Rendering Video Ad...</span>
                 </>
+              ) : !hasPhotos ? (
+                <span>Upload at least 1 product photo to generate</span>
               ) : (
                 <>
                   <span>Render Custom Video Ad Now</span>
@@ -442,16 +371,19 @@ export default function CreateAdPage() {
             <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-ink-muted">
               <span className="flex items-center gap-1.5">
                 <Eye className="w-4 h-4 text-accent-blue" />
-                <span>Live Aspect Simulation</span>
+                <span>Live Simulation</span>
               </span>
-              <span className="font-mono text-[10px] text-ink-faint">1080×1920 (9:16)</span>
+              <span className="font-mono text-[10px] text-ink-faint">
+                {aspectRatio === '9:16' ? '1080×1920 (9:16)' : '1920×1080 (16:9)'}
+              </span>
             </div>
 
-            <div className="studio-card p-4 rounded-3xl border border-border/80 flex items-center justify-center bg-canvas-subtle/30">
+            <div className="studio-card p-4 rounded-3xl border border-border/80 flex items-center justify-center bg-canvas-subtle/30 min-h-[460px]">
               <AdPreviewFrame
                 photoUrls={previewUrls}
                 photoUrl={previewUrls[0] || null}
-                briefText={brief || activeStyleConfig.placeholder}
+                briefText={brief}
+                aspectRatio={aspectRatio}
               />
             </div>
           </div>
