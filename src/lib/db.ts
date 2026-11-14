@@ -1,9 +1,25 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { DatabaseSync } from 'node:sqlite';
 import crypto from 'node:crypto';
 
 import { AdBlueprint } from './blueprint';
+
+let DatabaseSyncRef: any = null;
+let dbInstance: any = null;
+
+function resolveDatabaseSync() {
+  if (DatabaseSyncRef) return DatabaseSyncRef;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const mod = require('node:sqlite');
+    DatabaseSyncRef = mod.DatabaseSync || mod.default?.DatabaseSync;
+    return DatabaseSyncRef;
+  } catch (err: any) {
+    throw new Error(
+      `Failed to load built-in node:sqlite module: ${err?.message || err}. Make sure Node.js >= 22 is used with --experimental-sqlite.`
+    );
+  }
+}
 
 export type OrderStatus = 'submitted' | 'in_production' | 'ready' | 'failed';
 export type VideoStyle = 'style1_explainer' | 'style2_spotlight' | 'style3_lifestyle';
@@ -65,12 +81,12 @@ export interface Order {
   updated_at: number;
 }
 
-let dbInstance: DatabaseSync | null = null;
-
-export function getDatabase(): DatabaseSync {
+export function getDatabase(): any {
   if (dbInstance) {
     return dbInstance;
   }
+
+  const DatabaseSyncClass = resolveDatabaseSync();
 
   const dbFilePath = process.env.DATABASE_FILE || path.join(process.cwd(), 'data', 'studio.db');
   const dbDir = path.dirname(dbFilePath);
@@ -78,7 +94,7 @@ export function getDatabase(): DatabaseSync {
     fs.mkdirSync(dbDir, { recursive: true });
   }
 
-  const db = new DatabaseSync(dbFilePath);
+  const db = new DatabaseSyncClass(dbFilePath);
   db.exec(`
     PRAGMA journal_mode = WAL;
     CREATE TABLE IF NOT EXISTS orders (

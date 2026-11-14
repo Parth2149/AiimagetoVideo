@@ -3,6 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { getPhotoFilePath, getVideoFilePath } from '@/lib/storage';
 
+export const dynamic = 'force-dynamic';
+
 interface RouteContext {
   params: {
     type: string;

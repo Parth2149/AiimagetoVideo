@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import AdPreviewFrame from '@/components/AdPreviewFrame';
 import OrderStatusBadge from '@/components/OrderStatusBadge';
-import { AdCreativeMetadata } from '@/lib/db';
+import type { AdCreativeMetadata } from '@/lib/db';
 import {
   Copy,
   Check,

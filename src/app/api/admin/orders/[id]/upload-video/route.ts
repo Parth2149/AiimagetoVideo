@@ -3,6 +3,8 @@ import { attachVideoToOrder, getOrderById } from '@/lib/db';
 import { saveVideoFile } from '@/lib/storage';
 import { isAdminAuthenticated } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 interface RouteContext {
   params: {
     id: string;

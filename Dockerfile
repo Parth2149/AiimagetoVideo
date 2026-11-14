@@ -1,4 +1,4 @@
-FROM node:20-bookworm-slim
+FROM node:22-bookworm-slim
 
 # Install system dependencies: Python 3, pip, FFmpeg, certificates, and libatomic1 (required by Playwright driver)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -13,6 +13,9 @@ WORKDIR /app
 
 # Ensure Playwright browser binary is globally available
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
+# Enable experimental built-in SQLite in Node 22
+ENV NODE_OPTIONS="--experimental-sqlite"
 
 # Install Python packages required for autonomous video rendering
 RUN pip3 install --no-cache-dir --break-system-packages playwright pillow
