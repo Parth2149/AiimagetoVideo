@@ -10,6 +10,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const brief = (formData.get('brief') as string | null) || '';
+    const ctaText = (formData.get('ctaText') as string | null) || (formData.get('cta') as string | null) || '';
     const videoStyle = ((formData.get('videoStyle') as string) || 'style2_spotlight') as VideoStyle;
 
     // Collect all uploaded images from 'images', 'images[]', 'photos', 'photos[]', or single 'photo'
@@ -50,6 +51,7 @@ export async function POST(request: NextRequest) {
 
     const order = createOrder({
       brief,
+      ctaText: ctaText.trim() || undefined,
       videoStyle,
       photos: savedPhotos,
       photoFilename: savedPhotos[0].filename,

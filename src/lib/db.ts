@@ -79,6 +79,7 @@ export interface Order {
   photo_mime_type: string;
   photo_size: number;
   photos_json?: string | null;
+  cta_text?: string | null;
   video_filename: string | null;
   video_original_name: string | null;
   video_mime_type: string | null;
@@ -140,12 +141,17 @@ export function getDatabase(): any {
     db.exec(`ALTER TABLE orders ADD COLUMN photos_json TEXT;`);
   } catch {}
 
+  try {
+    db.exec(`ALTER TABLE orders ADD COLUMN cta_text TEXT;`);
+  } catch {}
+
   dbInstance = db;
   return dbInstance;
 }
 
 export function createOrder(data: {
   brief: string;
+  ctaText?: string;
   videoStyle?: VideoStyle;
   photoFilename?: string;
   photoOriginalName?: string;
@@ -158,6 +164,7 @@ export function createOrder(data: {
   const token = crypto.randomBytes(20).toString('hex');
   const now = Date.now();
   const style = data.videoStyle || 'style2_spotlight';
+  const cta = data.ctaText ? data.ctaText.trim() : null;
 
   const photoRecords: PhotoRecord[] = data.photos && data.photos.length > 0
     ? data.photos
@@ -173,14 +180,14 @@ export function createOrder(data: {
 
   const stmt = db.prepare(`
     INSERT INTO orders (
-      id, token, status, video_style, brief,
+      id, token, status, video_style, brief, cta_text,
       photo_filename, photo_original_name, photo_mime_type, photo_size,
       photos_json,
       video_filename, video_original_name, video_mime_type, video_size,
       ad_metadata,
       created_at, updated_at
     ) VALUES (
-      ?, ?, 'submitted', ?, ?,
+      ?, ?, 'submitted', ?, ?, ?,
       ?, ?, ?, ?,
       ?,
       NULL, NULL, NULL, NULL,
@@ -194,6 +201,7 @@ export function createOrder(data: {
     token,
     style,
     data.brief.trim(),
+    cta,
     primaryPhoto.filename,
     primaryPhoto.originalName,
     primaryPhoto.mimeType,

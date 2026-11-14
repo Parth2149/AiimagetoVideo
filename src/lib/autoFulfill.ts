@@ -47,6 +47,11 @@ export async function triggerAutoFulfill(orderId: string): Promise<void> {
           jobId
         );
 
+        // If user customized CTA, strictly override end_card_cta
+        if (order.cta_text) {
+          lifestylePlan.end_card_cta = order.cta_text;
+        }
+
         ensureUploadDirs();
         const videoFilename = `video_ad_${orderId}_${Date.now()}.mp4`;
         const targetVideoPath = path.join(process.cwd(), 'uploads', 'videos', videoFilename);
@@ -135,6 +140,14 @@ export async function triggerAutoFulfill(orderId: string): Promise<void> {
         order.photo_original_name,
         jobId
       );
+
+      // If user customized CTA, strictly override blueprint copy
+      if (order.cta_text) {
+        if (blueprint.copy) {
+          blueprint.copy.cta_text = order.cta_text;
+        }
+        (blueprint as any).cta = order.cta_text;
+      }
 
       console.log(
         `[${jobId}] AdBlueprint generated: category="${blueprint.product_category}", framing="${blueprint.framing_mode}", accent="${blueprint.palette.accent_color}", angles=${blueprint.photo_analysis?.length || 1}`

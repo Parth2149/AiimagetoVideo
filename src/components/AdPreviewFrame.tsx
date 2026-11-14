@@ -128,20 +128,24 @@ export default function AdPreviewFrame({
                   className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 animate-fade-in"
                 />
               ) : (
-                /* Clean Empty State */
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-[#FAF8F5]">
-                  <div className="w-12 h-12 rounded-2xl bg-stone-100 flex items-center justify-center text-ink-muted mb-2.5 border border-border/80">
-                    <Film className="w-6 h-6 opacity-60" />
+                /* Clean Empty State - Perfectly Centered in visible area above bottom card */
+                <div className={`absolute inset-0 flex flex-col items-center justify-center text-center bg-[#FAF8F5] ${
+                  isLandscape ? 'pt-8 pb-24 px-4' : 'pt-12 pb-36 px-6'
+                }`}>
+                  <div className={`rounded-2xl bg-stone-100 flex items-center justify-center text-ink-muted border border-border/80 ${
+                    isLandscape ? 'w-9 h-9 mb-1.5' : 'w-12 h-12 mb-2.5'
+                  }`}>
+                    <Film className={isLandscape ? 'w-4 h-4 opacity-60' : 'w-6 h-6 opacity-60'} />
                   </div>
                   <p className="text-xs font-semibold text-ink">Upload your product photo(s) to preview your ad</p>
-                  <p className="text-[11px] text-ink-muted mt-1 max-w-[240px]">
+                  <p className="text-[10px] sm:text-[11px] text-ink-muted mt-0.5 max-w-[280px] leading-tight">
                     Accepts 1 to 5 product angles • Visualizing {isLandscape ? '16:9 Landscape' : '9:16 Vertical'} format
                   </p>
                 </div>
               )}
 
               {/* Top Ad Header Pill + Angle Badge */}
-              <div className="relative z-10 p-3 sm:p-4 pt-4 flex items-center justify-between">
+              <div className="relative z-10 p-3 sm:p-4 pt-3 sm:pt-4 flex items-center justify-between">
                 <span className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-black/45 backdrop-blur-md text-white border border-white/20 shadow-sm">
                   {displayBrand}
                 </span>
@@ -160,11 +164,11 @@ export default function AdPreviewFrame({
               </div>
 
               {/* Bottom Agency-Grade Graphic Text Box */}
-              <div className={`relative z-10 bg-gradient-to-t from-black/85 via-black/45 to-transparent flex flex-col gap-2 ${
-                isLandscape ? 'p-3' : 'p-4 sm:p-5'
+              <div className={`relative z-10 bg-gradient-to-t from-black/85 via-black/45 to-transparent flex flex-col ${
+                isLandscape ? (!hasPhotos ? 'p-2.5 gap-1.5' : 'p-3 gap-2') : 'p-4 sm:p-5 gap-2'
               }`}>
                 <div className={`rounded-2xl bg-black/45 backdrop-blur-md border border-white/15 space-y-1 shadow-lg ${
-                  isLandscape ? 'p-2.5' : 'p-3.5'
+                  isLandscape ? (!hasPhotos ? 'p-2' : 'p-2.5') : 'p-3.5'
                 }`}>
                   <span
                     className="text-[9px] tracking-widest font-bold uppercase drop-shadow block"
@@ -173,17 +177,19 @@ export default function AdPreviewFrame({
                     {displayBadge}
                   </span>
                   <h3 className={`text-white font-semibold leading-tight drop-shadow-sm font-sans ${
-                    isLandscape ? 'text-sm' : 'text-base'
+                    isLandscape ? 'text-xs sm:text-sm' : 'text-base'
                   }`}>
                     {displayHeadline}
                   </h3>
-                  <p className="text-white/80 text-[11px] leading-relaxed line-clamp-2">
+                  <p className={`text-white/80 text-[11px] leading-relaxed ${
+                    isLandscape && !hasPhotos ? 'line-clamp-1' : 'line-clamp-2'
+                  }`}>
                     {displaySubheadline}
                   </p>
                 </div>
 
                 <div className="flex items-center justify-between pt-0.5">
-                  <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-ink shadow-md hover:bg-stone-100 transition-colors cursor-pointer">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full text-xs font-semibold bg-white text-ink shadow-md hover:bg-stone-100 transition-colors cursor-pointer">
                     <ShoppingBag className="w-3.5 h-3.5 text-ink" />
                     <span>{displayCta}</span>
                   </div>
