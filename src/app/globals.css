@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --canvas-bg: #FBF9F5;
+  --canvas-subtle: #F5F2EB;
+  --ink-color: #111418;
+  --border-color: #E6E2D9;
+}
+
+body {
+  background-color: var(--canvas-bg);
+  color: var(--ink-color);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Art-directed button glossy highlight */
+.btn-glossy {
+  position: relative;
+  background: linear-gradient(180deg, #1E232B 0%, #0F1216 100%);
+  color: #FFFFFF;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 6px 16px -2px rgba(15, 18, 22, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-glossy::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+  pointer-events: none;
+}
+
+.btn-glossy:hover:not(:disabled) {
+  background: linear-gradient(180deg, #272E38 0%, #14171D 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.14), 0 8px 24px -2px rgba(15, 18, 22, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.32);
+}
+
+.btn-glossy:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.btn-glossy:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Subtle card styling */
+.studio-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 3px rgba(27, 24, 20, 0.04), 0 8px 24px -4px rgba(27, 24, 20, 0.05);
+}
+
