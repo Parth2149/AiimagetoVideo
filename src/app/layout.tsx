@@ -62,7 +62,7 @@ export const metadata: Metadata = {
       'Upload a product photo and get a bespoke, agency-grade 9:16 vertical commercial ad in 10 seconds. Reference-anchored motion direction and editorial typography.',
     images: [
       {
-        url: '/verification_snapshots/create_page_presets_verified.png',
+        url: '/og-image.png',
         width: 1200,
         height: 630,
         alt: 'Videlto Creative Studio Interface',
@@ -74,7 +74,7 @@ export const metadata: Metadata = {
     title: 'Videlto — Turn Any Product Photo into a Cinematic Video Ad',
     description:
       'Turn static product photography into high-converting 9:16 video ads in seconds. Studio-grade video production for modern brands.',
-    images: ['/verification_snapshots/create_page_presets_verified.png'],
+    images: ['/og-image.png'],
     creator: '@videlto',
   },
   icons: {

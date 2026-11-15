@@ -13,10 +13,6 @@ uploads/photos/*
 uploads/videos/*
 !uploads/videos/.gitkeep
 
-# Temporary verification snapshots & videos
-public/verification_snapshots
-public/verification_videos
-
 # Logs and environment variables
 *.log
 .env*
