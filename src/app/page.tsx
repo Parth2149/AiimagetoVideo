@@ -138,6 +138,47 @@ const FAQS = [
   },
 ];
 
+function GalleryVideo({ src, poster }: { src: string; poster: string }) {
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+
+  React.useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            video.muted = true;
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+
+    observer.observe(video);
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  return (
+    <video
+      ref={videoRef}
+      src={`${src}#t=1.0`}
+      poster={poster}
+      muted
+      loop
+      playsInline
+      preload="none"
+      className="w-full h-full object-cover"
+    />
+  );
+}
+
 export default function HomePage() {
   const [activeStyleTab, setActiveStyleTab] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -224,7 +265,7 @@ export default function HomePage() {
                   key={currentStyle.videoUrl}
                   src={`${currentStyle.videoUrl}#t=0.5`}
                   poster={currentStyle.posterSnapshot}
-                  preload="auto"
+                  preload="metadata"
                   controls
                   autoPlay
                   playsInline
@@ -405,20 +446,7 @@ export default function HomePage() {
                     Finished Video
                   </span>
                   <div className="aspect-square rounded-xl overflow-hidden bg-black relative shadow-inner">
-                    <video
-                      src={`${card.video}#t=1.0`}
-                      poster={card.poster}
-                      muted
-                      loop
-                      playsInline
-                      autoPlay
-                      preload="auto"
-                      onLoadedMetadata={(e) => {
-                        e.currentTarget.muted = true;
-                        e.currentTarget.play().catch(() => {});
-                      }}
-                      className="w-full h-full object-cover"
-                    />
+                    <GalleryVideo src={card.video} poster={card.poster} />
                   </div>
                 </div>
               </div>
