@@ -72,31 +72,6 @@ export default function CreateAdPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Backend Health Status Check
-  const [healthStatus, setHealthStatus] = useState<'checking' | 'online' | 'offline'>('checking');
-
-  useEffect(() => {
-    let isMounted = true;
-    const checkHealth = async () => {
-      try {
-        const res = await fetch('/api/health');
-        if (!isMounted) return;
-        if (res.ok) {
-          const data = await res.json();
-          setHealthStatus(data.status === 'online' ? 'online' : 'offline');
-        } else {
-          setHealthStatus('offline');
-        }
-      } catch {
-        if (isMounted) setHealthStatus('offline');
-      }
-    };
-    checkHealth();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
   // Modal for previewing sample video
   const [previewModalVideo, setPreviewModalVideo] = useState<{ title: string; url: string } | null>(null);
 
@@ -162,42 +137,18 @@ export default function CreateAdPage() {
 
   return (
     <div className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12">
-      {/* Page Header with Live Backend Health Indicator */}
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-ink-muted">
-            <img src="/logo.png" alt="Videlto" className="w-4 h-4 object-contain" />
-            <span>Videlto Studio • Commercial Video Director</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">
-            Create Your Commercial Video Ad
-          </h1>
-          <p className="text-sm text-ink-secondary max-w-2xl leading-relaxed">
-            Upload 1 to 5 product photos. The Creative Director analyzes your product features, extracts harmonized color palettes, writes punchy copywriting, and renders a studio-grade video ad.
-          </p>
+      {/* Page Header */}
+      <div className="mb-8 space-y-2">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-ink-muted">
+          <img src="/logo.png" alt="Videlto" className="w-4 h-4 object-contain" />
+          <span>Videlto Studio • Commercial Video Director</span>
         </div>
-
-        {/* Live Backend Health Indicator */}
-        <div className="self-start sm:self-auto shrink-0">
-          {healthStatus === 'online' && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200/90 shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>AI Engine Online</span>
-            </div>
-          )}
-          {healthStatus === 'checking' && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-stone-600 bg-stone-100 border border-stone-200">
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-stone-500" />
-              <span>Checking Engine...</span>
-            </div>
-          )}
-          {healthStatus === 'offline' && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-200">
-              <span className="w-2 h-2 rounded-full bg-amber-500" />
-              <span>Engine Offline</span>
-            </div>
-          )}
-        </div>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">
+          Create Your Commercial Video Ad
+        </h1>
+        <p className="text-sm text-ink-secondary max-w-2xl leading-relaxed">
+          Upload 1 to 5 product photos. The Creative Director analyzes your product features, extracts harmonized color palettes, writes punchy copywriting, and renders a studio-grade video ad.
+        </p>
       </div>
 
       {/* Main Studio Grid */}
