@@ -224,12 +224,16 @@ export default function HomePage() {
                   key={currentStyle.videoUrl}
                   src={`${currentStyle.videoUrl}#t=0.5`}
                   poster={currentStyle.posterSnapshot}
-                  preload="metadata"
+                  preload="auto"
                   controls
                   autoPlay
                   playsInline
                   loop
                   muted
+                  onLoadedMetadata={(e) => {
+                    e.currentTarget.muted = true;
+                    e.currentTarget.play().catch(() => {});
+                  }}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -402,13 +406,17 @@ export default function HomePage() {
                   </span>
                   <div className="aspect-square rounded-xl overflow-hidden bg-black relative shadow-inner">
                     <video
-                      src={card.video}
+                      src={`${card.video}#t=1.0`}
                       poster={card.poster}
                       muted
                       loop
                       playsInline
                       autoPlay
-                      preload="metadata"
+                      preload="auto"
+                      onLoadedMetadata={(e) => {
+                        e.currentTarget.muted = true;
+                        e.currentTarget.play().catch(() => {});
+                      }}
                       className="w-full h-full object-cover"
                     />
                   </div>
