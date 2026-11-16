@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import FileDropzone from '@/components/FileDropzone';
 import AdPreviewFrame from '@/components/AdPreviewFrame';
-import { ArrowRight, Loader2, AlertCircle, Play, Eye, X, Check, Smartphone, Monitor, Info } from 'lucide-react';
+import { ArrowRight, Loader2, AlertCircle, Play, Eye, X, Check, Smartphone, Monitor, Info, Link2, Plus } from 'lucide-react';
 import { VideoStyle } from '@/lib/db';
 
 interface StyleConfig {
@@ -14,6 +14,7 @@ interface StyleConfig {
   description: string;
   placeholder: string;
   exampleVideo: string;
+  poster: string;
   accent: string;
   bestFor: string;
 }
@@ -26,6 +27,7 @@ const VIDEO_STYLES: StyleConfig[] = [
     description: 'Numbered ingredient/spec callouts, animated pointer lines, and deconstructed features with elegant typography.',
     placeholder: 'Highlight key craftsmanship, specs, or materials. End with a clear call-to-action.',
     exampleVideo: '/examples/style1_explainer.mp4',
+    poster: '/examples/style1_poster.jpg',
     accent: '#4E7D56',
     bestFor: 'Food menus, consumer products, electronics, cosmetics, apparel craftsmanship',
   },
@@ -36,6 +38,7 @@ const VIDEO_STYLES: StyleConfig[] = [
     description: 'Cinematic push-in zoom, ambient backdrop blur, punchy commercial copywriting, and glassmorphic card.',
     placeholder: 'Direct-response offer, limited-time promotion, or bold product hook. End with ‘Shop Now’.',
     exampleVideo: '/examples/style2_spotlight.mp4',
+    poster: '/examples/style2_poster.jpg',
     accent: '#E65100',
     bestFor: 'E-commerce sales, product launches, limited drops, direct-response offers',
   },
@@ -46,6 +49,7 @@ const VIDEO_STYLES: StyleConfig[] = [
     description: 'Authentic setting, candid atmosphere, and 3-beat human interaction storyboard with natural audio & voiceover.',
     placeholder: 'Tell a story about enjoying this product in an authentic daily setting or ritual.',
     exampleVideo: '/examples/style3_lifestyle.mp4',
+    poster: '/examples/style3_poster.jpg',
     accent: '#D97706',
     bestFor: 'Lifestyle brands, dining experiences, vehicles, wellness, apparel',
   },
@@ -73,7 +77,12 @@ export default function CreateAdPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Modal for previewing sample video
-  const [previewModalVideo, setPreviewModalVideo] = useState<{ title: string; url: string } | null>(null);
+  const [previewModalVideo, setPreviewModalVideo] = useState<{ title: string; url: string; poster?: string } | null>(null);
+
+  // URL Image Import State
+  const [imageUrlInput, setImageUrlInput] = useState('');
+  const [isFetchingUrl, setIsFetchingUrl] = useState(false);
+  const [urlError, setUrlError] = useState<string | null>(null);
 
   const activeStyleConfig = VIDEO_STYLES.find((s) => s.id === selectedStyle) || VIDEO_STYLES[0];
 
@@ -87,6 +96,63 @@ export default function CreateAdPage() {
       setActiveLabel(`${newFiles[0].name} (Hero Angle)`);
     } else {
       setActiveLabel(`${newFiles.length} Product Angles Ready`);
+    }
+  };
+
+  const handleUrlImageSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!imageUrlInput.trim() || isFetchingUrl) return;
+
+    if (selectedFiles.length >= 5) {
+      setUrlError('Maximum limit of 5 product photos reached.');
+      return;
+    }
+
+    const trimmed = imageUrlInput.trim();
+    if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+      setUrlError('Please enter a valid URL starting with http:// or https://');
+      return;
+    }
+
+    setIsFetchingUrl(true);
+    setUrlError(null);
+
+    try {
+      const response = await fetch(`/api/fetch-image?url=${encodeURIComponent(trimmed)}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to fetch image (HTTP ${response.status})`);
+      }
+
+      const blob = await response.blob();
+      const mimeType = blob.type || 'image/jpeg';
+
+      // Infer clean filename
+      let fileName = 'product-photo';
+      try {
+        const urlObj = new URL(trimmed);
+        const pathPart = urlObj.pathname.split('/').filter(Boolean).pop();
+        if (pathPart && pathPart.includes('.')) {
+          fileName = pathPart.split('?')[0];
+        }
+      } catch {}
+
+      if (!fileName.includes('.')) {
+        const ext = mimeType.includes('png') ? 'png' : mimeType.includes('webp') ? 'webp' : 'jpg';
+        fileName = `${fileName}-${Date.now()}.${ext}`;
+      }
+
+      const file = new File([blob], fileName, { type: mimeType });
+      const newFiles = [...selectedFiles, file];
+      const newUrls = [...previewUrls, URL.createObjectURL(file)];
+
+      handleFilesChange(newFiles, newUrls);
+      setImageUrlInput('');
+      setUrlError(null);
+    } catch (err: any) {
+      setUrlError(err.message || 'Unable to import image from the provided URL.');
+    } finally {
+      setIsFetchingUrl(false);
     }
   };
 
@@ -173,6 +239,62 @@ export default function CreateAdPage() {
                 activeLabel={activeLabel}
                 maxFiles={5}
               />
+
+              {/* Or Paste Product Image URL */}
+              <div className="pt-2 border-t border-border/50 space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-ink-secondary">
+                  <Link2 className="w-3.5 h-3.5 text-ink-muted" />
+                  <span>Or paste product image URL</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="url"
+                    value={imageUrlInput}
+                    onChange={(e) => {
+                      setImageUrlInput(e.target.value);
+                      if (urlError) setUrlError(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleUrlImageSubmit(e as any);
+                      }
+                    }}
+                    placeholder="https://example.com/product.jpg"
+                    disabled={isFetchingUrl || selectedFiles.length >= 5}
+                    className="flex-1 bg-canvas-subtle/50 border border-border rounded-xl px-3 py-2 text-xs text-ink placeholder:text-ink-faint focus:outline-none focus:ring-1 focus:ring-ink transition-all disabled:opacity-50"
+                  />
+                  <button
+                    type="button"
+                    onClick={(e) => handleUrlImageSubmit(e as any)}
+                    disabled={isFetchingUrl || !imageUrlInput.trim() || selectedFiles.length >= 5}
+                    className="btn-glossy px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isFetchingUrl ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Adding...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+                {urlError && (
+                  <p className="text-[11px] text-accent-red flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3 shrink-0" />
+                    <span>{urlError}</span>
+                  </p>
+                )}
+                {selectedFiles.length >= 5 && (
+                  <p className="text-[11px] text-ink-muted">
+                    Maximum limit of 5 photos reached.
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* 2. AD STYLE SELECTOR */}
@@ -223,7 +345,11 @@ export default function CreateAdPage() {
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setPreviewModalVideo({ title: style.title, url: style.exampleVideo });
+                              setPreviewModalVideo({
+                                title: style.title,
+                                url: style.exampleVideo,
+                                poster: style.poster,
+                              });
                             }}
                             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-canvas-subtle hover:bg-canvas-subtle/80 text-[11px] font-medium text-ink-secondary border border-border transition-colors"
                           >
@@ -438,12 +564,20 @@ export default function CreateAdPage() {
                 isLandscapeClip ? 'aspect-video w-full' : 'aspect-[9/16] max-h-[80vh]'
               }`}>
                 <video
-                  src={previewModalVideo.url}
+                  src={`${previewModalVideo.url}#t=0.5`}
+                  poster={previewModalVideo.poster}
                   controls
                   autoPlay
+                  muted
                   playsInline
                   loop
+                  preload="auto"
                   className="w-full h-full object-cover block"
+                  onLoadedMetadata={(e) => {
+                    const el = e.currentTarget;
+                    el.muted = true;
+                    el.play().catch(() => {});
+                  }}
                 />
               </div>
 

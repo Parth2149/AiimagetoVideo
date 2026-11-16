@@ -412,8 +412,10 @@ export default function HomePage() {
           <span className="text-xs font-bold uppercase tracking-widest text-emerald-700">
             Transformation Gallery
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink">
-            Static Photo In ➡️ High-Converting Video Ad Out
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink flex items-center justify-center flex-wrap gap-2.5">
+            <span>Static Photo In</span>
+            <ArrowRight className="w-6 h-6 sm:w-8 sm:h-8 text-emerald-600 shrink-0 inline-block" />
+            <span>High-Converting Video Ad Out</span>
           </h2>
           <p className="text-sm text-ink-secondary leading-relaxed">
             See how one raw product photo produces an editorial commercial ad with dynamic color grading and synchronized copy:
