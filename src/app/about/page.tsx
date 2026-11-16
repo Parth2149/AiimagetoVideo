@@ -3,12 +3,41 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { Film, CheckCircle2, ArrowRight, ShieldCheck, Zap, Layers, Cpu, Eye, Compass, Award } from 'lucide-react';
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://videlto.online';
+
 export const metadata: Metadata = {
-  title: 'About Videlto — Commercial Video Ad Studio',
+  title: {
+    absolute: 'About Videlto — AI Ecommerce Video Ad Maker & Image-to-Video Engine',
+  },
   description:
-    'Learn how Videlto delivers agency-grade commercial video ad production, generating bespoke 9:16 commercial video ads in seconds.',
+    'Learn how Videlto transforms product photos into studio-grade commercial video ads. Discover our multimodal AI image-to-video directing engine and product fidelity guarantee.',
   alternates: {
-    canonical: 'https://videlto.online/about',
+    canonical: `${siteUrl}/about`,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: `${siteUrl}/about`,
+    siteName: 'Videlto',
+    title: 'About Videlto — AI Ecommerce Video Ad Maker & Image-to-Video Engine',
+    description:
+      'Learn how Videlto transforms product photos into studio-grade commercial video ads. Discover our multimodal AI image-to-video directing engine and product fidelity guarantee.',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'About Videlto AI Video Ad Maker',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About Videlto — AI Ecommerce Video Ad Maker & Image-to-Video Engine',
+    description:
+      'Learn how Videlto transforms product photos into studio-grade commercial video ads in seconds.',
+    images: ['/og-image.jpg'],
+    creator: '@videlto',
   },
 };
 

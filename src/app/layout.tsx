@@ -21,26 +21,30 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'Videlto — Turn Any Product Photo into a Cinematic Video Ad in 10 Seconds',
-    template: '%s | Videlto Creative Studio',
+    default: 'Videlto — AI Product Photo to Video Ad Generator | Image to Video AI',
+    template: '%s | Videlto',
   },
   description:
-    'Commercial video ad platform turning product photography into editorial 9:16 vertical video ads for Instagram Reels, TikTok, and YouTube Shorts. Authentic product fidelity and custom motion.',
+    "Turn any product photo into a high-converting 9:16 or 16:9 video ad in seconds. Videlto's AI image-to-video studio crafts explainer, spotlight, and lifestyle ecommerce video ads.",
   keywords: [
+    'image to video',
+    'image to video ai',
+    'photo to video',
+    'ai product video',
+    'ai video generator',
+    'ecommerce video ads',
+    'ai video ad',
+    'free image to video',
     'commercial video ad creator',
     'product photo to video ad',
-    'ecommerce video ads',
     'Instagram Reels ad creator',
     'TikTok product video maker',
-    'commercial video ad studio',
     'Videlto',
     'Videlto Studio',
-    'DTC video marketing',
-    'social commerce video ads',
   ],
   authors: [{ name: 'Videlto Studio' }],
-  creator: 'Videlto Creative Studio',
-  publisher: 'Videlto Inc.',
+  creator: 'Videlto',
+  publisher: 'Videlto',
   robots: {
     index: true,
     follow: true,
@@ -56,24 +60,24 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: siteUrl,
-    siteName: 'Videlto Creative Studio',
-    title: 'Videlto — Turn Any Product Photo into a Cinematic Video Ad',
+    siteName: 'Videlto',
+    title: 'Videlto — AI Product Photo to Video Ad Generator | Image to Video AI',
     description:
-      'Upload a product photo and get a bespoke, agency-grade 9:16 vertical commercial ad in 10 seconds. Reference-anchored motion direction and editorial typography.',
+      "Turn any product photo into a high-converting 9:16 or 16:9 video ad in seconds. Videlto's AI image-to-video studio crafts explainer, spotlight, and lifestyle ecommerce video ads.",
     images: [
       {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Videlto Creative Studio Interface',
+        alt: 'Videlto — AI Product Photo to Video Ad Generator',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Videlto — Turn Any Product Photo into a Cinematic Video Ad',
+    title: 'Videlto — AI Product Photo to Video Ad Generator | Image to Video AI',
     description:
-      'Turn static product photography into high-converting 9:16 video ads in seconds. Studio-grade video production for modern brands.',
+      "Turn static product photography into high-converting 9:16 video ads in seconds. Studio-grade video production for modern brands.",
     images: ['/og-image.jpg'],
     creator: '@videlto',
   },
@@ -95,24 +99,10 @@ const jsonLd = {
   '@context': 'https://schema.org',
   '@graph': [
     {
-      '@type': 'SoftwareApplication',
-      name: 'Videlto',
-      operatingSystem: 'All',
-      applicationCategory: 'MultimediaApplication',
-      offers: {
-        '@type': 'Offer',
-        price: '0.00',
-        priceCurrency: 'USD',
-      },
-      description:
-        'Commercial video ad platform transforming static product photos into 9:16 social video ads.',
-      url: siteUrl,
-    },
-    {
       '@type': 'Organization',
       name: 'Videlto',
       url: siteUrl,
-      logo: `${siteUrl}/sample-salad-bowl.svg`,
+      logo: `${siteUrl}/logo.png`,
       sameAs: ['https://twitter.com/videlto'],
     },
     {
